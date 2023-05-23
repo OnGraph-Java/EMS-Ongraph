@@ -37,11 +37,7 @@ public class EventServiceImpl implements EventService {
 	private Logger logger = LoggerFactory.getLogger(EventServiceImpl.class.getName());
 	SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
-	// public static String uploadImageDir = System.getProperty("user.dir") +
-	// "/src/main/resources/static/img";
 	public static String projectlocalPath = System.getProperty("user.dir");
-
-	public static String localPath = "D://EventManagment//EventManagement//";
 
 	@Autowired
 	EventRepository eventRepository;
@@ -212,9 +208,7 @@ public class EventServiceImpl implements EventService {
 		try {
 			event = eventRepository.findById(eventId).get();
 			String str = event.getImageName();
-			str = str.replace("\\", "/");
-			str = projectlocalPath + str;
-			str = str.replace("//", "/");
+			str = projectlocalPath + "\\" + str;
 			event.setImageName(str);
 			return event;
 		} catch (Exception ex) {

@@ -31,7 +31,7 @@ public class GiftServiceImpl implements GiftService {
 	
 	SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
-	public static String localPath = "D://EventManagment//EventManagement//";
+	public static String projectlocalPath = System.getProperty("user.dir");
 
 	@Autowired
 	GiftRepository giftRepository;
@@ -109,9 +109,7 @@ public class GiftServiceImpl implements GiftService {
 		try {
 			gift = giftRepository.findById(giftId).get();
 			String str = gift.getImageName();
-			str = str.replace("\\", "/");
-			str = localPath + str;
-			str = str.replace("//", "/");
+			str = projectlocalPath + "\\" + str;
 			gift.setImageName(str);
 		} catch (Exception ex) {
 			logger.error("Exception got while fetching gift : " + ex.getMessage());
@@ -128,9 +126,7 @@ public class GiftServiceImpl implements GiftService {
 		
 		for(Gift gift : giftList) {
 			String str = gift.getImageName();
-			str = str.replace("\\", "/");
-			str = localPath + str;
-			str = str.replace("//", "/");
+			str = projectlocalPath + "\\" + str;
 			gift.setImageName(str);
 		}
 		return giftList;
