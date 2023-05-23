@@ -84,7 +84,7 @@ public class EventController {
 			@RequestParam(value = "eventDate", defaultValue = "", required = false) String eventDate,
 			@RequestParam(value = "isDashboard", required = false) boolean isDashboard,
 			@RequestParam(value = "page", defaultValue = "0") int page,
-			@RequestParam(value = "size", defaultValue = "0") int size) {
+			@RequestParam(value = "size", defaultValue = "8") int size) {
 
 		List<Event> eventList = eventService.getAllEvent(adminId, eventCategory, eventType, eventDate, isDashboard, page, size);
 		if (eventList != null) {

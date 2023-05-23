@@ -60,7 +60,7 @@ public class RewardsController {
 	public ResponseEntity<?> getAllUserRewards(@PathVariable("adminId") Long adminId,
 			@RequestParam(value = "rewardRange", defaultValue = "0") Long rewardRange,
 			@RequestParam(value = "page", defaultValue = "0") int page,
-			@RequestParam(value = "size", defaultValue = "0") int size,
+			@RequestParam(value = "size", defaultValue = "8") int size,
 			@RequestParam(value = "sortBy", defaultValue = "createdOn") String sortBy) {
 		List<UserRewards> list = null;
 		try {
