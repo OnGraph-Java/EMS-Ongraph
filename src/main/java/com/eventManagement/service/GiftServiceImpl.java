@@ -80,13 +80,13 @@ public class GiftServiceImpl implements GiftService {
 	}
 
 	public Gift parseGiftDto(Gift gift, GiftDto giftDto) {
-
+	    logger.info("Parsing GiftDto to Gift object");
 		gift.setGiftTitle(giftDto.getGiftTitle());
 		gift.setRedeemRequirePoints(giftDto.getRedeemRequirePoints());
 		gift.setAdminId(giftDto.getAdminId());
 		gift.setAvailableFor(giftDto.getAvailableFor());
 		gift.setGiftDetail(giftDto.getGiftDetail());
-
+	    logger.info("GiftDto parsed successfully");
 		return gift;
 	}
 

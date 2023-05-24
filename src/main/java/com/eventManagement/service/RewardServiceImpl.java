@@ -83,7 +83,6 @@ public class RewardServiceImpl implements RewardService {
 //	}
 
 	private void saveUserRewards(Reward reward, List<String> rewardUserId) {
-		logger.info("Save user rewards service started :");
 		UserRewards updatedUserRewards = new UserRewards();
 		for (String userId : rewardUserId) {
 			LocalDate currentDate = LocalDate.now();
@@ -133,6 +132,7 @@ public class RewardServiceImpl implements RewardService {
 	}
 
 	public Reward parseReward(Reward reward, RewardsDto rewardsDto) throws ParseException {
+	    logger.info("Parsing RewardsDto to Reward object");
 		LocalDate currentDate = LocalDate.now();
 		reward.setNumberOfUser(Long.valueOf(rewardsDto.getRewardUserId().size()));
 		reward.setActivityType(rewardsDto.getActivityType());
@@ -141,6 +141,7 @@ public class RewardServiceImpl implements RewardService {
 		reward.setAdminId(rewardsDto.getAdminId());
 		reward.setRewardDate(LocalDate.parse(currentDate.format(df), df));
 		reward.setStatus("Completed");
+	    logger.info("RewardsDto parsed successfully");
 		return reward;
 	}
 

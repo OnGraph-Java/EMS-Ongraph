@@ -79,9 +79,8 @@ public class EventServiceImpl implements EventService {
 
 	@Override
 	public String updateEvent(Long id, EventDto eventDto, MultipartFile[] files) throws Exception {
-
+		logger.info("Update event service started :");
 		try {
-			logger.info("Update event service started :");
 			Event event = eventRepository.findById(id).get();
 			if (event == null) {
 				throw new Exception("Event not found");
@@ -108,7 +107,7 @@ public class EventServiceImpl implements EventService {
 	}
 
 	private Event parseEvent(Event event, EventDto eventDto) throws ParseException {
-
+	    logger.info("Parsing EventDto to Event object");
 		event.setAdminId(Long.parseLong(eventDto.getAdminId()));
 		event.setAddress(eventDto.getAddress());
 		event.setStartDate(sdf.parse(sdf.format((sdf.parse(eventDto.getStartDate())))));
@@ -121,6 +120,7 @@ public class EventServiceImpl implements EventService {
 
 		event.setLocation(eventDto.getLocation());
 		event.setUserType(eventDto.getUserType());
+	    logger.info("EventDto parsed successfully");
 		return event;
 	}
 
@@ -216,19 +216,22 @@ public class EventServiceImpl implements EventService {
 
 	@Override
 	public Event getEvent(Long eventId) {
-		logger.info("Get event service started :");
+		logger.info("Started fetching event by id: " + eventId);
 		Event event = null;
 		try {
 			event = eventRepository.findById(eventId).get();
 			String str = event.getImageName();
 			str = projectlocalPath + "\\" + str;
 			event.setImageName(str);
+			logger.info("Successfully fetched event by id: " + eventId);
 			return event;
+
 		} catch (Exception ex) {
 			logger.error("Exception got fetching event by id : " + eventId);
 		}
-		logger.info("Get event service ended :");
+		logger.info("Failed to fetch event by id: " + eventId);
 		return null;
+
 	}
 
 	@Override
@@ -243,16 +246,19 @@ public class EventServiceImpl implements EventService {
 						eventUsersDto.getEventId());
 				if (eventUser != null && eventUser.getUserId() == eventUsersDto.getUserId()) {
 					response = "User already registered in event";
+	                logger.info("Register event user service ended (User already registered)");
+
 					return response;
 				}
 				eventUser = parseEventUser(eventUsersDto);
 				eventUser.setCreatedOn(sdf.parse(sdf.format(new Date())));
 				eventUsersRepository.save(eventUser);
 				response = "Successfully register user for event";
-				logger.info("Register event user service ended :");
+                logger.info("Register event user service ended (User already registered)");
 
 			} else {
 				response = "no such event exists";
+	            logger.info("Register event user service ended (No such event exists)");
 				return response;
 			}
 		} catch (Exception ex) {
@@ -278,7 +284,7 @@ public class EventServiceImpl implements EventService {
 	}
 
 	public EventUsers parseEventUser(EventUsersDto eventUsersDto) {
-
+	    logger.info("Parsing EventUsersDto to EventUsers object");
 		EventUsers eventUsers = new EventUsers();
 		eventUsers.setAdminId(eventUsersDto.getAdminId());
 		eventUsers.setEmail(eventUsersDto.getEmail());
@@ -289,7 +295,7 @@ public class EventServiceImpl implements EventService {
 		eventUsers.setRegistrationId(eventUsersDto.getRegistrationId());
 		eventUsers.setUserId(eventUsersDto.getUserId());
 		eventUsers.setUserType(eventUsersDto.getUserType());
-
+	    logger.info("EventUsersDto parsed successfully");
 		return eventUsers;
 	}
 }
