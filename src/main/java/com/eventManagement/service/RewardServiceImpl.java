@@ -132,7 +132,7 @@ public class RewardServiceImpl implements RewardService {
 	}
 
 	public Reward parseReward(Reward reward, RewardsDto rewardsDto) throws ParseException {
-	    logger.info("Parsing RewardsDto to Reward object");
+		logger.info("Parsing RewardsDto to Reward object");
 		LocalDate currentDate = LocalDate.now();
 		reward.setNumberOfUser(Long.valueOf(rewardsDto.getRewardUserId().size()));
 		reward.setActivityType(rewardsDto.getActivityType());
@@ -141,7 +141,7 @@ public class RewardServiceImpl implements RewardService {
 		reward.setAdminId(rewardsDto.getAdminId());
 		reward.setRewardDate(LocalDate.parse(currentDate.format(df), df));
 		reward.setStatus("Completed");
-	    logger.info("RewardsDto parsed successfully");
+		logger.info("RewardsDto parsed successfully");
 		return reward;
 	}
 
@@ -192,12 +192,13 @@ public class RewardServiceImpl implements RewardService {
 			}
 			for (Reward reward : rewardsList) {
 				reward.setStatus("Completed");
-				logger.info("Get rewards list service ended :");
 
 			}
 		} catch (Exception ex) {
 			logger.error("Exception got while fetching Rewards History from DB : " + ex.getMessage());
 		}
+		logger.info("Get rewards list service ended :");
+
 		return rewardsList;
 	}
 
@@ -235,26 +236,26 @@ public class RewardServiceImpl implements RewardService {
 
 	@Override
 	public List<UserRewardsHistory> searchUserRewardsList(Long userId, String activityType) {
-		logger.info("search user rewards list service started :");
+		logger.info("Search user rewards list service started. User ID: " + userId);
 		List<UserRewardsHistory> userRewardList = null;
 		try {
 			activityType = activityType.toLowerCase();
 			activityType = "%" + activityType + "%";
 			userRewardList = userRewardsHistoryRepository.findByActivityType(userId, activityType);
-			logger.info("search user rewards list service ended:");
 		} catch (Exception ex) {
 			logger.error("Exception got while Searching user reward with name :" + activityType);
 		}
+		logger.info("Search user rewards list service ended. User ID: " + userId);
 		return userRewardList;
 	}
 
 	@Override
 	public List<UserRewardsHistory> getUserRewardsList(Long userId) {
-		logger.info("search user rewards list service started:");
+		logger.info("Search user rewards list service started. User ID: " + userId);
 		List<UserRewardsHistory> history = null;
 		try {
 			history = userRewardsHistoryRepository.findByUserId(userId);
-			logger.info("search user rewards list service ended:");
+			logger.info("Search user rewards list service ended. User ID: " + userId);
 		} catch (Exception ex) {
 			logger.error("Exception got while fetching user reward with id userId : " + userId);
 		}

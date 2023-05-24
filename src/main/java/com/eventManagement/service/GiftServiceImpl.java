@@ -71,11 +71,11 @@ public class GiftServiceImpl implements GiftService {
 			updatedGift.setLastUpdated(sdf.parse(sdf.format(new Date())));
 			updatedGift.setImageName(imageName);
 			giftRepository.save(updatedGift);
-			logger.info("Update gift service ended :");
 		} catch (Exception ex) {
 			logger.error("Exception got while updating gift :" + ex.getMessage());
 			return "Exception got while updating gift :" + ex.getMessage();
 		}
+	    logger.info("Update gift service ended.");
 		return "Successfully Saved Gift";
 	}
 
