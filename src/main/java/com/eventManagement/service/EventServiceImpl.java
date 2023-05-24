@@ -156,18 +156,22 @@ public class EventServiceImpl implements EventService {
 	}
 
 	private Date getEventDate(String eventDate, boolean isDashboard) {
-		if(isDashboard && eventDate.equals("")) {
-			return new Date();
-		}
 		Date date = null;
-		SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-        try {
-        	date = sdf.parse(eventDate);
-        } catch (Exception e) {
-        	logger.error("Error occure while parsing date: {}", e);
+
+		try {
+			if (isDashboard && eventDate.equals("")) {
+				return sdf.parse(sdf.format(new Date()));
+			}
+			SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+			date = sdf.parse(eventDate);
+		} catch (ParseException pe) {
+			logger.error("Error occure while parsing date: "+pe.getMessage());
+		} catch (Exception ex) {
+			logger.error("Error occure while parsing date: "+ex.getMessage());
 		}
 		return date;
 	}
+
 
 	@Override
 	public List<Event> searchEvent(String title) {
