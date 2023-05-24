@@ -181,7 +181,7 @@ public class EventServiceImpl implements EventService {
 
 	@Override
 	public List<Event> searchEvent(String title) {
-		logger.info("search event service started :");
+		logger.info("search event service started :"+title);
 		List<Event> eventList = new ArrayList<>();
 		title = "%" + title.toLowerCase() + "%";
 		try {
@@ -189,7 +189,7 @@ public class EventServiceImpl implements EventService {
 		} catch (Exception e) {
 			logger.error("Error occurred while fetching event");
 		}
-		logger.info("search event service ended :");
+		logger.info("search event service ended :"+title);
 		return eventList;
 	}
 
