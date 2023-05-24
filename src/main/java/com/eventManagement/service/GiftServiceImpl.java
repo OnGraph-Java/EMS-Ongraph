@@ -28,7 +28,7 @@ import com.eventManagement.repository.GiftRepository;
 public class GiftServiceImpl implements GiftService {
 
 	private Logger logger = LoggerFactory.getLogger(GiftServiceImpl.class.getName());
-	
+
 	SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
 	public static String projectlocalPath = System.getProperty("user.dir");
@@ -38,6 +38,7 @@ public class GiftServiceImpl implements GiftService {
 
 	@Override
 	public String addGift(GiftDto giftDto, MultipartFile file) {
+		logger.info("Add gift service started :");
 		String response = "";
 		Gift gift = new Gift();
 		try {
@@ -47,6 +48,7 @@ public class GiftServiceImpl implements GiftService {
 			gift.setImageName(imageName);
 			gift.setCreatedOn(sdf.parse(sdf.format(new Date())));
 			giftRepository.save(gift);
+			logger.info("Add gift service ended :");
 			response = "Successfully saved Gift";
 		} catch (Exception ex) {
 			logger.error("Exception got while saving Gift : " + ex.getMessage());
@@ -59,6 +61,7 @@ public class GiftServiceImpl implements GiftService {
 	public String updateGift(Long giftId, @Valid GiftDto giftDto, MultipartFile file) {
 
 		try {
+			logger.info("Update gift service started :");
 			Optional<Gift> gift = giftRepository.findById(giftId);
 			if (gift.isEmpty()) {
 				return "No such gift exists";
@@ -68,6 +71,7 @@ public class GiftServiceImpl implements GiftService {
 			updatedGift.setLastUpdated(sdf.parse(sdf.format(new Date())));
 			updatedGift.setImageName(imageName);
 			giftRepository.save(updatedGift);
+			logger.info("Update gift service ended :");
 		} catch (Exception ex) {
 			logger.error("Exception got while updating gift :" + ex.getMessage());
 			return "Exception got while updating gift :" + ex.getMessage();
@@ -87,12 +91,13 @@ public class GiftServiceImpl implements GiftService {
 	}
 
 	public String saveFileInSystem(MultipartFile file) throws Exception {
-
+		logger.info("Savefile in system service started :");
 		String UPLOAD_DIR = "event\\images\\";
 		String fileName = StringUtils.cleanPath(file.getOriginalFilename());
 		try {
 			Path path = Paths.get(UPLOAD_DIR + fileName);
 			Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+			logger.info("Savefile in system service ended :");
 		} catch (IOException e) {
 			throw new Exception("Exception got while saving files : " + e.getMessage());
 		} catch (UncheckedIOException e) {
@@ -104,13 +109,15 @@ public class GiftServiceImpl implements GiftService {
 
 	@Override
 	public Gift findGift(Long giftId) {
-
+		logger.info("Find gift service started :");
 		Gift gift = null;
 		try {
 			gift = giftRepository.findById(giftId).get();
 			String str = gift.getImageName();
 			str = projectlocalPath + "\\" + str;
 			gift.setImageName(str);
+			logger.info("Find gift service ended :");
+
 		} catch (Exception ex) {
 			logger.error("Exception got while fetching gift : " + ex.getMessage());
 		}
@@ -119,16 +126,18 @@ public class GiftServiceImpl implements GiftService {
 
 	@Override
 	public List<Gift> findAllGift(Long adminId, String sortBy, String title) {
-		
+		logger.info("Find all gift service started :");
 		List<Gift> giftList;
-		
+
 		giftList = giftRepository.findAllGiftByAdminId(adminId, sortBy, title.toLowerCase());
-		
-		for(Gift gift : giftList) {
+
+		for (Gift gift : giftList) {
 			String str = gift.getImageName();
 			str = projectlocalPath + "\\" + str;
 			gift.setImageName(str);
 		}
+		logger.info("Find all gift service ended :");
+
 		return giftList;
 	}
 
