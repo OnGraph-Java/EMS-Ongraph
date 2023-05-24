@@ -23,7 +23,6 @@ public class StatisticsService {
 	public List<Statistics> getDashboardStatistics(Long adminId) {
 
 		List<Statistics> statisticsList = new ArrayList<>();
-		
 		String query = "SELECT e.event_id, e.event_title, "
 				    + "     SUM(CASE WHEN eu.user_type = '0' THEN 1 ELSE 0 END) AS 'universityStudent',"
 				    + "     SUM(CASE WHEN eu.user_type = '1' THEN 1 ELSE 0 END) AS 'employee',"

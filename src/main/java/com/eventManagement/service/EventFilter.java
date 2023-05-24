@@ -30,6 +30,7 @@ public class EventFilter {
 	public List<Event> filterEvents(Long adminId, String eventCategory, String eventType, Date eventDate,
 			boolean isDashboard, int page, int size) {
 		List<Event> eventList = null;
+		logger.info("Filtering events. Admin ID: " + adminId);
 		try {
 			String query = "SELECT e FROM Event e where e.adminId = " + adminId;
 
@@ -39,8 +40,8 @@ public class EventFilter {
 			if (!eventCategory.equals("all")) {
 				query = query + " AND e.eventCategory = :eventCategory";
 			}
-			
-			if(isDashboard) {
+
+			if (isDashboard) {
 				query = query + " and e.startDate > :eventDate";
 			}
 
@@ -51,10 +52,10 @@ public class EventFilter {
 			if (!eventCategory.equals("all")) {
 				eventQuery.setParameter("eventCategory", eventCategory);
 			}
-			if(isDashboard) {
+			if (isDashboard) {
 				eventQuery.setParameter("eventDate", eventDate);
 			}
-			
+
 			if (isDashboard) {
 				eventQuery.setMaxResults(5);
 			}
@@ -65,8 +66,7 @@ public class EventFilter {
 			logger.error("Exception caught while getting event List :" + ex.getMessage());
 		}
 
-		
-		if(page == 0 && size == 0) {
+		if (page == 0 && size == 0) {
 			return eventList;
 		}
 		int startIndex = page * size;
@@ -74,39 +74,42 @@ public class EventFilter {
 		if (startIndex >= eventList.size()) {
 			return Collections.emptyList();
 		}
+		logger.info("Events filtered successfully. Admin ID: " + adminId);
 		return eventList.subList(startIndex, endIndex);
 	}
-	
-	public List<Event> filterEventsCriteria(Long adminId, String eventCategory, String eventType, Date eventDate, boolean isDashboard, int page, int size) {
-	    CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-	    CriteriaQuery<Event> query = cb.createQuery(Event.class);
-	    Root<Event> root = query.from(Event.class);
 
-	    List<Predicate> predicates = new ArrayList<>();
+	public List<Event> filterEventsCriteria(Long adminId, String eventCategory, String eventType, Date eventDate,
+			boolean isDashboard, int page, int size) {
+		logger.info("Filtering events using criteria. Admin ID: " + adminId);
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Event> query = cb.createQuery(Event.class);
+		Root<Event> root = query.from(Event.class);
 
-	    // Add condition for start time
-	    if (isDashboard) {
-	        predicates.add(cb.greaterThanOrEqualTo(root.get("startDate"), eventDate));
-	    }
+		List<Predicate> predicates = new ArrayList<>();
 
-	    // Add conditions for optional filters if provided
-	    if (!eventCategory.equals("all")) {
-	        predicates.add(cb.like(root.get("eventCategory"), "%" + eventCategory + "%"));
-	    }
+		// Add condition for start time
+		if (isDashboard) {
+			predicates.add(cb.greaterThanOrEqualTo(root.get("startDate"), eventDate));
+		}
 
-	    if (!eventType.equals("all")) {
-	        predicates.add(cb.like(root.get("eventType"), "%" + eventType + "%"));
-	    }
+		// Add conditions for optional filters if provided
+		if (!eventCategory.equals("all")) {
+			predicates.add(cb.like(root.get("eventCategory"), "%" + eventCategory + "%"));
+		}
 
-	    if (adminId != null) {
-	        predicates.add(cb.equal(root.get("adminId"), adminId));
-	    }
+		if (!eventType.equals("all")) {
+			predicates.add(cb.like(root.get("eventType"), "%" + eventType + "%"));
+		}
 
-	    Predicate finalPredicate = cb.and(predicates.toArray(new Predicate[0]));
+		if (adminId != null) {
+			predicates.add(cb.equal(root.get("adminId"), adminId));
+		}
 
-	    query.select(root).where(finalPredicate);
+		Predicate finalPredicate = cb.and(predicates.toArray(new Predicate[0]));
 
-	    // Add sorting
+		query.select(root).where(finalPredicate);
+
+		// Add sorting
 //	    if (isDashboard) {
 //	        query.orderBy(
 //	                cb.desc(root.get("startDate")),
@@ -114,13 +117,14 @@ public class EventFilter {
 //	        );
 //	    }
 
-	    TypedQuery<Event> typedQuery = entityManager.createQuery(query);
+		TypedQuery<Event> typedQuery = entityManager.createQuery(query);
 
-	    // Add paging
-	    typedQuery.setFirstResult((page) * size);
-	    typedQuery.setMaxResults(size);
-
-	    return typedQuery.getResultList();
+		// Add paging
+		typedQuery.setFirstResult((page) * size);
+		typedQuery.setMaxResults(size);
+		logger.info("Events filtered successfully using criteria. Admin ID: " + adminId);
+		return typedQuery.getResultList();
+		
 	}
 
 }
