@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.springframework.data.domain.Page;
+
 import com.eventManagement.dto.RewardsDto;
 import com.eventManagement.model.Reward;
 import com.eventManagement.model.UserRewards;
@@ -13,12 +15,14 @@ public interface RewardService {
 
 	String saveReward(@Valid RewardsDto rewardsDto);
 
-	List<UserRewards> getAllUserRewardsList(Long adminId, Long rewardRange, int page, int size, String sortBy, String username);
+	Page<UserRewards> getAllUserRewardsList(Long adminId, Long rewardRange, int page, int size, String sortBy, String username);
 
 	List<UserRewardsHistory> getAllUserRewardsHistory(Long userId);
 
-	List<Reward> getRewardsList(Long adminId, int pageNo, int size);
-
+	List<Reward> getRewardsListExport(Long adminId);
+	
+	Page<Reward> getRewardsListPage(Long adminId, int pageNo, int size);
+	
 	List<UserRewards> searchRewardsUserList(Long adminId, String username);
 
 	String getUserRewardsPoints(Long userId);
