@@ -96,7 +96,12 @@ public class EventController {
 	}
 
 	@GetMapping("/getEvent/{eventId}")
-	public ResponseEntity<?> getAllEvent(@PathVariable("eventId") Long eventId) {
+	@ApiOperation(value = "Get Event by ID", notes = "Retrieve an event by its ID")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "Success", response = Event.class),
+			@ApiResponse(code = 200, message = "No event found with the given ID", response = String.class)
+	})
+	public ResponseEntity<?> getAllEvent(@PathVariable("eventId") @ApiParam(value = "Event ID", example = "123") Long eventId) {
 		Event event = eventService.getEvent(eventId);
 		if (event != null) {
 			return ResponseEntity.ok().body(event);
