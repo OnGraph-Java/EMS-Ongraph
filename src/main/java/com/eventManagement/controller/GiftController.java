@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,14 +24,18 @@ import com.eventManagement.service.GiftService;
 
 @RestController
 @RequestMapping("/gift")
+@Api(tags = "Gift Controller")
 public class GiftController {
 
 	@Autowired
 	GiftService giftService;
 
 	@PostMapping("/addGift")
-	public ResponseEntity<String> addGift(@RequestPart("file") MultipartFile file,
-			@RequestPart("data") @Valid GiftDto giftDto, BindingResult result) {
+	@ApiOperation("Add a gift")
+	@ApiResponses({ @ApiResponse(code = 200, message = "Gift added successfully"),
+			@ApiResponse(code = 400, message = "Bad request") })
+	public ResponseEntity<String> addGift(@ApiParam(value = "Gift file") @RequestPart("file") MultipartFile file,
+			@ApiParam(value = "Gift data") @RequestPart("data") @Valid GiftDto giftDto, BindingResult result) {
 
 		if (result.hasErrors()) {
 			StringBuilder errorMessage = new StringBuilder();
@@ -47,8 +52,12 @@ public class GiftController {
 	}
 
 	@PostMapping("/updateGift/{giftId}")
-	public ResponseEntity<String> updateGift(@RequestPart("file") MultipartFile file,
-			@RequestPart("data") @Valid GiftDto giftDto, BindingResult result, @PathVariable("giftId") Long giftId) {
+	@ApiOperation("Update a gift")
+	@ApiResponses({ @ApiResponse(code = 200, message = "Gift updated successfully"),
+			@ApiResponse(code = 400, message = "Bad request") })
+	public ResponseEntity<String> updateGift(@ApiParam(value = "Gift file") @RequestPart("file") MultipartFile file,
+			@ApiParam(value = "Gift data") @RequestPart("data") @Valid GiftDto giftDto, BindingResult result,
+			@ApiParam(value = "Gift ID", example = "123") @PathVariable("giftId") Long giftId) {
 
 		if (result.hasErrors()) {
 			StringBuilder errorMessage = new StringBuilder();
@@ -65,7 +74,11 @@ public class GiftController {
 	}
 
 	@GetMapping("/findGift/{giftId}")
-	public ResponseEntity<?> findGift(@PathVariable("giftId") Long giftId) {
+	@ApiOperation("Find a gift by ID")
+	@ApiResponses({ @ApiResponse(code = 200, message = "Gift found"), @ApiResponse(code = 400, message = "Bad request"),
+			@ApiResponse(code = 404, message = "Gift not found") })
+	public ResponseEntity<?> findGift(
+			@ApiParam(value = "Gift ID", example = "123") @PathVariable("giftId") Long giftId) {
 
 		Gift gift = null;
 		try {
@@ -73,16 +86,20 @@ public class GiftController {
 		} catch (Exception ex) {
 			return ResponseEntity.badRequest().body(ex.getMessage());
 		}
-		if(gift == null) {
+		if (gift == null) {
 			return ResponseEntity.ok("no such gift exist");
 		}
 		return ResponseEntity.ok(gift);
 	}
 
 	@GetMapping("/getAllGift/{adminId}")
-	public ResponseEntity<?> getAllGift(@PathVariable("adminId") Long adminId, 
-										@RequestParam(name = "title", defaultValue = "") String title, 
-										@RequestParam(name = "sortBy", defaultValue = "createdOn") String sortBy) {
+	@ApiOperation("Get all gifts")
+	@ApiResponses({ @ApiResponse(code = 200, message = "Gifts found"),
+			@ApiResponse(code = 400, message = "Bad request"), @ApiResponse(code = 404, message = "No gifts found") })
+	public ResponseEntity<?> getAllGift(
+			@ApiParam(value = "Admin ID", example = "123") @PathVariable("adminId") Long adminId,
+			@ApiParam(value = "Title") @RequestParam(name = "title", defaultValue = "") String title,
+			@ApiParam(value = "Sort by", allowableValues = "createdOn, title") @RequestParam(name = "sortBy", defaultValue = "createdOn") String sortBy) {
 
 		List<Gift> giftList = null;
 		try {
@@ -90,7 +107,7 @@ public class GiftController {
 		} catch (Exception ex) {
 			return ResponseEntity.badRequest().body(ex.getMessage());
 		}
-		if(giftList == null) {
+		if (giftList == null) {
 			return ResponseEntity.ok("no such gift exist");
 		}
 		return ResponseEntity.ok(giftList);
