@@ -8,6 +8,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,7 @@ import com.opencsv.CSVWriter;
 
 @RestController
 @RequestMapping("/rewards")
+@Api(tags = "Reward Controller")
 public class RewardsController {
 
 	private Logger logger = LoggerFactory.getLogger(RewardsController.class.getName());
@@ -45,6 +47,9 @@ public class RewardsController {
 	RewardFilter rewardFilter;
 
 	@PostMapping("/saveReward")
+	@ApiOperation("Save a reward")
+	@ApiResponses({ @ApiResponse(code = 200, message = "Reward saved successfully"),
+			@ApiResponse(code = 400, message = "Bad request") })
 	public ResponseEntity<String> saveReward(@RequestBody @Valid RewardsDto rewardsDto) {
 
 		String response = null;
@@ -59,12 +64,16 @@ public class RewardsController {
 	}
 
 	@GetMapping("/getAllUserRewards/{adminId}")
-	public ResponseEntity<?> getAllUserRewards(@PathVariable("adminId") Long adminId,
-			@RequestParam(value = "rewardRange", defaultValue = "0") Long rewardRange,
-			@RequestParam(value = "page", defaultValue = "0") int page,
-			@RequestParam(value = "size", defaultValue = "8") int size,
-			@RequestParam(value = "sortBy", defaultValue = "createdOn") String sortBy,
-			@RequestParam(value = "username", defaultValue = "all") String username) {
+	@ApiOperation("Get all user rewards")
+	@ApiResponses({ @ApiResponse(code = 200, message = "User rewards found"),
+			            @ApiResponse(code = 400, message = "Bad request") })
+	public ResponseEntity<?> getAllUserRewards(
+			@ApiParam(value = "Admin ID", example = "123") @PathVariable("adminId") Long adminId,
+			@ApiParam(value = "Reward range", example = "0") @RequestParam(value = "rewardRange", defaultValue = "0") Long rewardRange,
+			@ApiParam(value = "Page number") @RequestParam(value = "page", defaultValue = "0") int page,
+			@ApiParam(value = "Page size") @RequestParam(value = "size", defaultValue = "8") int size,
+			@ApiParam(value = "Sort by") @RequestParam(value = "sortBy", defaultValue = "createdOn") String sortBy,
+			@ApiParam(value = "Username", defaultValue = "all") @RequestParam(value = "username", defaultValue = "all") String username) {
 		Page<UserRewards> list = null;
 		try {
 			list = rewardService.getAllUserRewardsList(adminId, rewardRange, page, size, sortBy, username);
@@ -91,12 +100,16 @@ public class RewardsController {
 //	}
 
 	@GetMapping("/getUserRewardsHistory/{userId}")
-	public ResponseEntity<?> getUserRewardsHistory(@PathVariable("userId") Long userId,
-			@RequestParam(value = "activityType", required = false, defaultValue = "all") String activityType,
-			@RequestParam(value = "fromDate", required = false, defaultValue = "all") String fromDate,
-			@RequestParam(value = "endDate", required = false, defaultValue = "all") String endDate,
-			@RequestParam(value = "page", defaultValue = "1") int page,
-			@RequestParam(value = "size", defaultValue = "8") int size) {
+	@ApiOperation("Get user rewards history")
+	@ApiResponses({ @ApiResponse(code = 200, message = "User rewards history found"),
+			@ApiResponse(code = 400, message = "Bad request") })
+	public ResponseEntity<?> getUserRewardsHistory(
+			@ApiParam(value = "User ID", example = "123") @PathVariable("userId") Long userId,
+			@ApiParam(value = "Activity type", defaultValue = "all") @RequestParam(value = "activityType", required = false, defaultValue = "all") String activityType,
+			@ApiParam(value = "From date", defaultValue = "all") @RequestParam(value = "fromDate", required = false, defaultValue = "all") String fromDate,
+			@ApiParam(value = "End date", defaultValue = "all") @RequestParam(value = "endDate", required = false, defaultValue = "all") String endDate,
+			@ApiParam(value = "Page number", defaultValue = "0") @RequestParam(value = "page", defaultValue = "0") int page,
+			@ApiParam(value = "Page size", defaultValue = "8") @RequestParam(value = "size", defaultValue = "8") int size) {
 
 		PageEntity<UserRewardsHistory> list = null;
 		try {
@@ -110,8 +123,12 @@ public class RewardsController {
 	}
 
 	@GetMapping("/searchUserReward/{userId}")
-	public ResponseEntity<?> searchUserReward(@PathVariable("userId") Long userId,
-			@RequestParam(value = "activityType", required = true) String activityType) {
+	@ApiOperation("Search user rewards")
+	@ApiResponses({ @ApiResponse(code = 200, message = "User rewards found"),
+			@ApiResponse(code = 400, message = "Bad request") })
+	public ResponseEntity<?> searchUserReward(
+			@ApiParam(value = "User ID", example = "123") @PathVariable("userId") Long userId,
+			@ApiParam(value = "Activity type", required = true) @RequestParam(value = "activityType", required = true) String activityType) {
 		List<UserRewardsHistory> list = null;
 		try {
 			list = rewardService.searchUserRewardsList(userId, activityType);
@@ -124,7 +141,11 @@ public class RewardsController {
 	}
 
 	@GetMapping("/getUserRewardsPoints/{userId}")
-	public ResponseEntity<String> getUserRewardsPoints(@PathVariable("userId") Long userId) {
+	@ApiOperation("Get user rewards points")
+	@ApiResponses({ @ApiResponse(code = 200, message = "User rewards points retrieved"),
+			@ApiResponse(code = 400, message = "Bad request") })
+	public ResponseEntity<String> getUserRewardsPoints(
+			@ApiParam(value = "User ID", example = "123") @PathVariable("userId") Long userId) {
 		String rewardPoints;
 		try {
 			rewardPoints = rewardService.getUserRewardsPoints(userId);
@@ -138,10 +159,15 @@ public class RewardsController {
 	}
 
 	@GetMapping("/getRewardsHistory/{adminId}")
-	public ResponseEntity<?> getRewardsHistory(@PathVariable("adminId") Long adminId,
-			                              @RequestParam(defaultValue = "0") int page,
-	                                      @RequestParam(defaultValue = "8") int size) {
+	@ApiOperation("Get rewards history")
+	@ApiResponses({ @ApiResponse(code = 200, message = "Rewards history retrieved"),
+			@ApiResponse(code = 400, message = "Bad request") })
+	public ResponseEntity<?> getRewardsHistory(
+			@ApiParam(value = "Admin ID", example = "123") @PathVariable("adminId") Long adminId,
+			@ApiParam(value = "Page number", example = "0") @RequestParam(defaultValue = "0") int page,
+			@ApiParam(value = "Page size", example = "8") @RequestParam(defaultValue = "8") int size) {
 		Page<Reward> list = null;
+
 		try {
 			list = rewardService.getRewardsListPage(adminId, page, size);
 		} catch (Exception ex) {
@@ -152,7 +178,12 @@ public class RewardsController {
 	}
 
 	@GetMapping("/getRewardUserCount/{adminId}")
-	public ResponseEntity<?> getRewardUserCount(@PathVariable("adminId") Long adminId) {
+	@ApiOperation("Get reward user count")
+	@ApiResponses({ @ApiResponse(code = 200, message = "Reward user count retrieved"),
+			@ApiResponse(code = 400, message = "Bad request") })
+
+	public ResponseEntity<?> getRewardUserCount(
+			@ApiParam(value = "Admin ID", example = "123") @PathVariable("adminId") Long adminId) {
 		List<RewardPoints> list = null;
 		try {
 			list = rewardFilter.getRewardsPoints(adminId);
@@ -164,7 +195,12 @@ public class RewardsController {
 	}
 
 	@GetMapping("/getRewardExport/{adminId}")
-	public ResponseEntity<?> getRewardExport(@PathVariable("adminId") Long adminId, HttpServletResponse response) {
+	@ApiOperation("Export rewards")
+	@ApiResponses({ @ApiResponse(code = 200, message = "Rewards exported successfully"),
+			@ApiResponse(code = 400, message = "Bad request") })
+	public ResponseEntity<?> getRewardExport(
+			@ApiParam(value = "Admin ID", example = "123") @PathVariable("adminId") Long adminId,
+			HttpServletResponse response) {
 
 		List<Reward> rewardlist = null;
 		try {
@@ -179,7 +215,12 @@ public class RewardsController {
 	}
 
 	@GetMapping("/getUserRewardExport/{userId}")
-	public ResponseEntity<?> getUserRewardExport(@PathVariable("userId") Long userId, HttpServletResponse response) {
+	@ApiOperation("Export user rewards")
+	@ApiResponses({ @ApiResponse(code = 200, message = "User rewards exported successfully"),
+			@ApiResponse(code = 400, message = "Bad request") })
+	public ResponseEntity<?> getUserRewardExport(
+			@ApiParam(value = "User ID", example = "123") @PathVariable("userId") Long userId,
+			HttpServletResponse response) {
 
 		List<UserRewardsHistory> userRewardList = null;
 		try {
