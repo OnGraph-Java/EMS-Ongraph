@@ -12,6 +12,7 @@ import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.eventManagement.dto.RewardPoints;
 import com.eventManagement.dto.RewardsDto;
+import com.eventManagement.model.PageEntity;
 import com.eventManagement.model.Reward;
 import com.eventManagement.model.UserRewards;
 import com.eventManagement.model.UserRewardsHistory;
@@ -64,7 +66,7 @@ public class RewardsController {
 	@GetMapping("/getAllUserRewards/{adminId}")
 	@ApiOperation("Get all user rewards")
 	@ApiResponses({ @ApiResponse(code = 200, message = "User rewards found"),
-			@ApiResponse(code = 400, message = "Bad request") })
+			            @ApiResponse(code = 400, message = "Bad request") })
 	public ResponseEntity<?> getAllUserRewards(
 			@ApiParam(value = "Admin ID", example = "123") @PathVariable("adminId") Long adminId,
 			@ApiParam(value = "Reward range", example = "0") @RequestParam(value = "rewardRange", defaultValue = "0") Long rewardRange,
@@ -72,7 +74,7 @@ public class RewardsController {
 			@ApiParam(value = "Page size") @RequestParam(value = "size", defaultValue = "8") int size,
 			@ApiParam(value = "Sort by") @RequestParam(value = "sortBy", defaultValue = "createdOn") String sortBy,
 			@ApiParam(value = "Username", defaultValue = "all") @RequestParam(value = "username", defaultValue = "all") String username) {
-		List<UserRewards> list = null;
+		Page<UserRewards> list = null;
 		try {
 			list = rewardService.getAllUserRewardsList(adminId, rewardRange, page, size, sortBy, username);
 		} catch (Exception ex) {
@@ -109,7 +111,7 @@ public class RewardsController {
 			@ApiParam(value = "Page number", defaultValue = "0") @RequestParam(value = "page", defaultValue = "0") int page,
 			@ApiParam(value = "Page size", defaultValue = "8") @RequestParam(value = "size", defaultValue = "8") int size) {
 
-		List<UserRewardsHistory> list = null;
+		PageEntity<UserRewardsHistory> list = null;
 		try {
 			list = rewardFilter.getUserRewardsHistory(userId, activityType, fromDate, endDate, page, size);
 		} catch (Exception ex) {
@@ -164,9 +166,10 @@ public class RewardsController {
 			@ApiParam(value = "Admin ID", example = "123") @PathVariable("adminId") Long adminId,
 			@ApiParam(value = "Page number", example = "0") @RequestParam(defaultValue = "0") int page,
 			@ApiParam(value = "Page size", example = "8") @RequestParam(defaultValue = "8") int size) {
-		List<Reward> list = null;
+		Page<Reward> list = null;
+
 		try {
-			list = rewardService.getRewardsList(adminId, page, size);
+			list = rewardService.getRewardsListPage(adminId, page, size);
 		} catch (Exception ex) {
 			logger.error("exception got while fetching Rewards History : " + ex.getMessage());
 			return ResponseEntity.badRequest().body("exception got while fetching Rewards History: " + ex.getMessage());
@@ -201,7 +204,7 @@ public class RewardsController {
 
 		List<Reward> rewardlist = null;
 		try {
-			rewardlist = rewardService.getRewardsList(adminId, 0, 0);
+			rewardlist = rewardService.getRewardsListExport(adminId);
 			generateExportFile(rewardlist, response);
 
 		} catch (Exception ex) {

@@ -2,6 +2,7 @@ package com.eventManagement.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -14,7 +15,7 @@ import com.eventManagement.model.Reward;
 public interface RewardRepository extends PagingAndSortingRepository<Reward,Long> {
 
 	@Query("Select reward from Reward reward where reward.adminId = :adminId")
-	List<Reward> findByAdminId(@Param("adminId") Long adminId, Pageable pageable);
+	Page<Reward> findByAdminId(@Param("adminId") Long adminId, Pageable pageable);
 	
 
 	@Query("Select reward from Reward reward where reward.adminId = :adminId")

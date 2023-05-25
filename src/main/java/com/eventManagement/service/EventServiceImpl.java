@@ -18,6 +18,7 @@ import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -48,7 +49,7 @@ public class EventServiceImpl implements EventService {
 	@Override
 	public String createEvent(MultipartFile[] files, EventDto eventDto) {
 		// need a method to validate eventDto
-		logger.info("Started creating event with name :"+eventDto.getEventTitle());
+		logger.info("Started creating event with name :" + eventDto.getEventTitle());
 		try {
 			Event event = new Event();
 
@@ -74,7 +75,7 @@ public class EventServiceImpl implements EventService {
 
 	@Override
 	public String updateEvent(Long id, EventDto eventDto, MultipartFile[] files) throws Exception {
-		logger.info("Upadting Event With info : "+eventDto.getEventTitle());
+		logger.info("Upadting Event With info : " + eventDto.getEventTitle());
 		try {
 			Event event = eventRepository.findById(id).get();
 			if (event == null) {
@@ -120,19 +121,21 @@ public class EventServiceImpl implements EventService {
 	@Override
 	public List<Event> getAllEvent(Long adminId, String eventCategory, String eventType, String eventDate,
 			boolean isDashboard, int page, int size, String title) {
-		if(title.equals("all")) {
+		if (title.equals("all")) {
 			title = "";
 		}
-		logger.info("Getting event for Admin : "+adminId+" and Eventtitle : "+title );
+		logger.info("Getting event for Admin : " + adminId + " and Eventtitle : " + title);
 		List<Event> eventList = new ArrayList<>();
 
-		PageRequest pageReq = PageRequest.of(page, size, Sort.by("startDate")); 
-		
-		if(isDashboard || !eventDate.equals("")) {
+		PageRequest pageReq = PageRequest.of(page, size, Sort.by("startDate"));
+
+		if (isDashboard || !eventDate.equals("")) {
 			Date dateOfEvent = getEventDate(eventDate, isDashboard);
-			eventList = eventRepository.filterEventsDashboards(adminId, eventCategory.toLowerCase(), eventType.toLowerCase(), dateOfEvent, pageReq, title.toLowerCase());
+			eventList = eventRepository.filterEventsDashboards(adminId, eventCategory.toLowerCase(),
+					eventType.toLowerCase(), dateOfEvent, pageReq, title.toLowerCase());
 		} else {
-			eventList = eventRepository.filterEvents(adminId, eventCategory.toLowerCase(), eventType.toLowerCase(), pageReq, title.toLowerCase());
+			eventList = eventRepository.filterEvents(adminId, eventCategory.toLowerCase(), eventType.toLowerCase(),
+					pageReq, title.toLowerCase());
 		}
 
 		if (eventList != null) {
@@ -167,13 +170,12 @@ public class EventServiceImpl implements EventService {
 			SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
 			date = sdf.parse(eventDate);
 		} catch (ParseException pe) {
-			logger.error("Error occure while parsing date: "+pe.getMessage());
+			logger.error("Error occure while parsing date: " + pe.getMessage());
 		} catch (Exception ex) {
-			logger.error("Error occure while parsing date: "+ex.getMessage());
+			logger.error("Error occure while parsing date: " + ex.getMessage());
 		}
 		return date;
 	}
-
 
 	@Override
 	public List<Event> searchEvent(String title) {
@@ -209,7 +211,7 @@ public class EventServiceImpl implements EventService {
 
 	@Override
 	public Event getEvent(Long eventId) {
-        logger.info("fetching Event With Id : "+eventId);
+		logger.info("fetching Event With Id : " + eventId);
 		Event event = null;
 		try {
 			event = eventRepository.findById(eventId).get();
@@ -225,7 +227,7 @@ public class EventServiceImpl implements EventService {
 
 	@Override
 	public String registerEventUser(@Valid EventUsersDto eventUsersDto) {
-        logger.info("Registering Event user for event :"+eventUsersDto.getEventId());
+		logger.info("Registering Event user for event :" + eventUsersDto.getEventId());
 		String response = "";
 
 		try {
@@ -254,12 +256,13 @@ public class EventServiceImpl implements EventService {
 	}
 
 	@Override
-	public List<EventUsers> getEventRegisterUsers(Long eventId) {
-		logger.info("Getting Event Registered Users for EventID :"+eventId);
-		List<EventUsers> eventUserList = new ArrayList<>();
+	public Page<EventUsers> getEventRegisterUsers(Long eventId, int page, int size) {
+		logger.info("Getting Event Registered Users for EventID :" + eventId);
+		Page<EventUsers> eventUserList = null;
 		Optional<Event> event = eventRepository.findById(eventId);
 		if (event.isPresent()) {
-			eventUserList = eventUsersRepository.findAllEventByEventId(eventId);
+			PageRequest pageReq = PageRequest.of(page, size);
+			eventUserList = eventUsersRepository.findAllEventByEventIdPage(eventId, pageReq);
 		} else {
 			logger.error("No such event Exists");
 		}
@@ -280,5 +283,19 @@ public class EventServiceImpl implements EventService {
 		eventUsers.setUserType(eventUsersDto.getUserType());
 
 		return eventUsers;
+	}
+
+	@Override
+	public List<EventUsers> getExportEventRegisterUsers(Long eventId) {
+		logger.info("Getting Event Registered Users Export Data for EventID :" + eventId);
+		List<EventUsers> eventUserList = null;
+		Optional<Event> event = eventRepository.findById(eventId);
+		if (event.isPresent()) {
+			eventUserList = eventUsersRepository.findAllEventByEventId(eventId);
+
+		} else {
+			logger.error("No such event Exists");
+		}
+		return eventUserList;
 	}
 }

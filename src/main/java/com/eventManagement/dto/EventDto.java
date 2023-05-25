@@ -31,16 +31,11 @@ public class EventDto {
 	@NotBlank(message = "userType is null")
 	private String userType;
 	
-	@NotBlank(message = "location is null")
-    @Size(min = 2, max = 60)
+
 	private String location;
-	
-	@NotBlank(message = "address is null")
-    @Size(min = 2, max = 60)
+
 	private String address;
-	
-	@NotBlank(message = "link is null")
-    @Size(min = 2, max = 60)
+
 	private String link;
 	
 	@NotBlank(message = "eventDetails is null")

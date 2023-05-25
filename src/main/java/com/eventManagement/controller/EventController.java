@@ -8,6 +8,7 @@ import com.eventManagement.service.StatisticsService;
 import com.opencsv.CSVWriter;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -101,7 +102,7 @@ public class EventController {
 			@ApiResponse(code = 200, message = "Success", response = Event.class),
 			@ApiResponse(code = 200, message = "No event found with the given ID", response = String.class)
 	})
-	public ResponseEntity<?> getAllEvent(@PathVariable("eventId") @ApiParam(value = "Event ID", example = "123") Long eventId) {
+	public ResponseEntity<?> getEvent(@PathVariable("eventId") @ApiParam(value = "Event ID", example = "123") Long eventId) {
 		Event event = eventService.getEvent(eventId);
 		if (event != null) {
 			return ResponseEntity.ok().body(event);
@@ -147,8 +148,10 @@ public class EventController {
 	@ApiResponses({ @ApiResponse(code = 200, message = "List of event users returned successfully"),
 			@ApiResponse(code = 200, message = "No event users exist") })
 	public ResponseEntity<?> getEventRegisterUsers(
-			@ApiParam(value = "Event ID", example = "123") @PathVariable("eventId") Long eventId) {
-		List<EventUsers> eventUserList = eventService.getEventRegisterUsers(eventId);
+			@ApiParam(value = "Event ID", example = "123") @PathVariable("eventId") Long eventId,
+  	  @RequestParam(value = "page", defaultValue = "0") int page,
+			@RequestParam(value = "size", defaultValue = "7") int size) {
+		Page<EventUsers> eventUserList = eventService.getEventRegisterUsers(eventId, page, size);
 		if (eventUserList != null && eventUserList.size() > 0) {
 			return ResponseEntity.ok().body(eventUserList);
 		} else {
@@ -164,7 +167,7 @@ public class EventController {
 			@ApiParam(value = "Event ID", example = "123") @PathVariable("eventId") Long eventId,
 			HttpServletResponse response) {
 		try {
-			List<EventUsers> eventUserList = eventService.getEventRegisterUsers(eventId);
+			List<EventUsers> eventUserList = eventService.getExportEventRegisterUsers(eventId);
 			if (eventUserList != null && eventUserList.size() > 0) {
 				generateExportFile(eventUserList, response);
 				return ResponseEntity.ok().body(eventUserList);

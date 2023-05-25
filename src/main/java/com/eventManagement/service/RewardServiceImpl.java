@@ -12,6 +12,7 @@ import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -45,7 +46,7 @@ public class RewardServiceImpl implements RewardService {
 	@Override
 	@Transactional
 	public String saveReward(@Valid RewardsDto rewardsDto) {
-		logger.info("Saving Reward with details :"+rewardsDto.getActivityType());
+		logger.info("Saving Reward with details :" + rewardsDto.getActivityType());
 		String response = "";
 		Reward reward = new Reward();
 		try {
@@ -63,9 +64,8 @@ public class RewardServiceImpl implements RewardService {
 		return response;
 	}
 
-
 	private void saveUserRewards(Reward reward, List<String> rewardUserId) {
-		logger.info("Saving User Reward with Id's :"+rewardUserId.toString());
+		logger.info("Saving User Reward with Id's :" + rewardUserId.toString());
 
 		UserRewards updatedUserRewards = new UserRewards();
 		for (String userId : rewardUserId) {
@@ -97,7 +97,7 @@ public class RewardServiceImpl implements RewardService {
 
 	private void saveUserRewardHistory(UserRewards userRewardsHistory, Reward reward) {
 		LocalDate currentDate = LocalDate.now();
-		logger.info("Saving User Reward History with Id's :"+userRewardsHistory.getUserId());
+		logger.info("Saving User Reward History with Id's :" + userRewardsHistory.getUserId());
 
 		UserRewardsHistory userRewardHistory = new UserRewardsHistory();
 		try {
@@ -126,15 +126,16 @@ public class RewardServiceImpl implements RewardService {
 	}
 
 	@Override
-	public List<UserRewards> getAllUserRewardsList(Long adminId, Long rewardRange, int page, int size, String sortBy, String username) {
-		if(username.equals("all")) {
-        	username = "";
-        }
-        logger.info("Getting user rewards with AdminId :"+adminId+" & username : "+username);
+	public Page<UserRewards> getAllUserRewardsList(Long adminId, Long rewardRange, int page, int size, String sortBy,
+			String username) {
+		if (username.equals("all")) {
+			username = "";
+		}
+		logger.info("Getting user rewards with AdminId :" + adminId + " & username : " + username);
 
-		List<UserRewards> userRewardsList = null;
+		Page<UserRewards> userRewardsList = null;
 		try {
-			PageRequest pageReq = PageRequest.of(page, size, Sort.by("createdOn")); 
+			PageRequest pageReq = PageRequest.of(page, size, Sort.by("createdOn"));
 			if (rewardRange > 0) {
 				userRewardsList = userRewardsRepository.findByAdminIdAndReward(adminId, rewardRange, pageReq, username);
 			} else {
@@ -148,7 +149,7 @@ public class RewardServiceImpl implements RewardService {
 
 	@Override
 	public List<UserRewardsHistory> getAllUserRewardsHistory(Long userId) {
-		logger.info("getting User Reward History for userID : "+userId);
+		logger.info("getting User Reward History for userID : " + userId);
 		List<UserRewardsHistory> userRewardsHistoryList = null;
 		try {
 			userRewardsHistoryList = userRewardsHistoryRepository.findByUserId(userId);
@@ -159,19 +160,28 @@ public class RewardServiceImpl implements RewardService {
 	}
 
 	@Override
-	public List<Reward> getRewardsList(Long adminId, int page, int size) {
-		logger.info("getting Rewards List for adminId : "+adminId);
+	public List<Reward> getRewardsListExport(Long adminId) {
+		logger.info("getting Rewards List for adminId : " + adminId);
 
 		List<Reward> rewardsList = null;
-
 		try {
-			if (page == 0 && size == 0) {
-				rewardsList = rewardRepository.findByAdminId(adminId);
-			} else {
-				Pageable pageable = PageRequest.of(page, size);
-
-				rewardsList = rewardRepository.findByAdminId(adminId, pageable);
+			rewardsList = rewardRepository.findByAdminId(adminId);
+			for (Reward reward : rewardsList) {
+				reward.setStatus("Completed");
 			}
+		} catch (Exception ex) {
+			logger.error("Exception got while fetching Rewards History from DB : " + ex.getMessage());
+		}
+		return rewardsList;
+	}
+
+	@Override
+	public Page<Reward> getRewardsListPage(Long adminId, int page, int size) {
+		logger.info("getting Rewards List for adminId : " + adminId);
+		Page<Reward> rewardsList = null;
+		try {
+			Pageable pageable = PageRequest.of(page, size);
+			rewardsList = rewardRepository.findByAdminId(adminId, pageable);
 			for (Reward reward : rewardsList) {
 				reward.setStatus("Completed");
 			}
@@ -197,7 +207,7 @@ public class RewardServiceImpl implements RewardService {
 
 	@Override
 	public String getUserRewardsPoints(Long userId) {
-        logger.info("Getting user rewards points for userId :"+userId);
+		logger.info("Getting user rewards points for userId :" + userId);
 		Optional<UserRewards> userReward = null;
 		try {
 			userReward = userRewardsRepository.findById(userId);
@@ -213,7 +223,7 @@ public class RewardServiceImpl implements RewardService {
 
 	@Override
 	public List<UserRewardsHistory> searchUserRewardsList(Long userId, String activityType) {
-        logger.info("Searching user rewards for userId :"+userId+" with activityType :"+activityType);
+		logger.info("Searching user rewards for userId :" + userId + " with activityType :" + activityType);
 
 		List<UserRewardsHistory> userRewardList = null;
 		try {
@@ -228,7 +238,7 @@ public class RewardServiceImpl implements RewardService {
 
 	@Override
 	public List<UserRewardsHistory> getUserRewardsList(Long userId) {
-		logger.info("getting user rewards history for userId :"+userId);
+		logger.info("getting user rewards history for userId :" + userId);
 		List<UserRewardsHistory> history = null;
 		try {
 			history = userRewardsHistoryRepository.findByUserId(userId);

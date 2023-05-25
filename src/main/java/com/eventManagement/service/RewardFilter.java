@@ -3,11 +3,11 @@ package com.eventManagement.service;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaQuery;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,8 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.eventManagement.dto.RewardPoints;
-import com.eventManagement.model.Event;
 import com.eventManagement.model.UserRewardsHistory;
+import com.eventManagement.model.PageEntity;
 
 @Service
 public class RewardFilter {
@@ -33,10 +33,10 @@ public class RewardFilter {
 		List<RewardPoints> rewardPointsList = new ArrayList<>();
 
 		String query = "SELECT  Count(*) AS 'allUserCount', "
-				+ "  SUM(CASE WHEN ur.user_role = '301' THEN 1 ELSE 0 END) AS 'allUniversityStudents', "
-				+ "  SUM(CASE WHEN ur.user_role = '302' THEN 1 ELSE 0 END) AS 'allScholorshipStudents', "
-				+ "  SUM(CASE WHEN ur.user_role = '303' THEN 1 ELSE 0 END) AS 'allEmployees'"
-				+ "  FROM user_rewards ur " + "  WHERE ur.admin_id = :adminId";
+				+ "  SUM(CASE WHEN ur.user_role = '0' THEN 1 ELSE 0 END) AS 'allUniversityStudents', "
+				+ "  SUM(CASE WHEN ur.user_role = '1' THEN 1 ELSE 0 END) AS 'allScholorshipStudents', "
+				+ "  SUM(CASE WHEN ur.user_role = '2' THEN 1 ELSE 0 END) AS 'allEmployees'"
+				+ "  FROM user_rewards ur WHERE ur.admin_id = :adminId";
 
 		try {
 			rewardPointsList = entityManager.createNativeQuery(query, "RewardPointsMapping")
@@ -50,7 +50,7 @@ public class RewardFilter {
 
 	}
 
-	public List<UserRewardsHistory> getUserRewardsHistory(Long userId, String activityType, String fromDate,
+	public PageEntity<UserRewardsHistory> getUserRewardsHistory(Long userId, String activityType, String fromDate,
 			String endDate, int page, int size) {
 		logger.info("Fetching user rewards history. User ID: " + userId);
 		List<UserRewardsHistory> userRewardList = new ArrayList<>();
@@ -88,19 +88,26 @@ public class RewardFilter {
 		}
 
 		try {
+			if(page  <= 0) {
+				page = 1;
+			}
+			int offset = (page - 1) * size;
+			rewardQuery.setFirstResult(offset);
+			rewardQuery.setMaxResults(size);
 			userRewardList = rewardQuery.getResultList();
 
+			CriteriaQuery<Long> countQuery = entityManager.getCriteriaBuilder().createQuery(Long.class);
+			countQuery.select(entityManager.getCriteriaBuilder().count(countQuery.from(UserRewardsHistory.class)));
+			long totalElements = entityManager.createQuery(countQuery).getSingleResult();
+
+			PageEntity<UserRewardsHistory> pageObj = new PageEntity<UserRewardsHistory>(userRewardList, page, size,
+					totalElements);
+			return pageObj;
 		} catch (Exception ex) {
 			logger.error("Exception while getting statList: " + ex.getMessage());
 		}
-
-		int startIndex = page * size;
-		int endIndex = Math.min(startIndex + size, userRewardList.size());
-		if (startIndex >= userRewardList.size()) {
-			return Collections.emptyList();
-		}
 		logger.info("User rewards history fetched successfully. User ID: " + userId);
-		return userRewardList.subList(startIndex, endIndex);
+		return null;
 	}
 
 }
