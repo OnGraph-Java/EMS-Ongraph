@@ -141,15 +141,17 @@ public class RewardServiceImpl implements RewardService {
 	}
 
 	@Override
-	public List<UserRewards> getAllUserRewardsList(Long adminId, Long rewardRange, int page, int size, String sortBy) {
-
+	public List<UserRewards> getAllUserRewardsList(Long adminId, Long rewardRange, int page, int size, String sortBy, String username) {
+        if(username.equals("all")) {
+        	username = "";
+        }
 		List<UserRewards> userRewardsList = null;
 		try {
 			PageRequest pageReq = PageRequest.of(page, size, Sort.by("createdOn")); 
 			if (rewardRange > 0) {
-				userRewardsList = userRewardsRepository.findByAdminIdAndReward(adminId, rewardRange, pageReq);
+				userRewardsList = userRewardsRepository.findByAdminIdAndReward(adminId, rewardRange, pageReq, username);
 			} else {
-				userRewardsList = userRewardsRepository.findByAdminId(adminId, pageReq);
+				userRewardsList = userRewardsRepository.findByAdminId(adminId, pageReq, username);
 			}
 		} catch (Exception ex) {
 			logger.error("Exception got while fetching User Rewards from DB : " + ex.getMessage());

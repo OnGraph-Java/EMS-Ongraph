@@ -84,9 +84,10 @@ public class EventController {
 			@RequestParam(value = "eventDate", defaultValue = "", required = false) String eventDate,
 			@RequestParam(value = "isDashboard", required = false) boolean isDashboard,
 			@RequestParam(value = "page", defaultValue = "0") int page,
-			@RequestParam(value = "size", defaultValue = "8") int size) {
+			@RequestParam(value = "size", defaultValue = "8") int size,
+			@RequestParam(value = "title", defaultValue = "all") String title) {
 
-		List<Event> eventList = eventService.getAllEvent(adminId, eventCategory, eventType, eventDate, isDashboard, page, size);
+		List<Event> eventList = eventService.getAllEvent(adminId, eventCategory, eventType, eventDate, isDashboard, page, size, title);
 		if (eventList != null) {
 			return ResponseEntity.ok().body(eventList);
 		} else {
@@ -96,7 +97,6 @@ public class EventController {
 	
 	@GetMapping("/getEvent/{eventId}")
 	public ResponseEntity<?> getAllEvent(@PathVariable("eventId") Long eventId ){
-
 		Event event = eventService.getEvent(eventId);
 		if (event != null) {
 			return ResponseEntity.ok().body(event);
@@ -105,16 +105,16 @@ public class EventController {
 		}
 	}
 	
-
-	@GetMapping("/searchEvent/{title}")
-	public ResponseEntity<?> searchEvent(@PathVariable("title") String title) {
-		List<Event> eventList = eventService.searchEvent(title);
-		if (eventList != null) {
-			return ResponseEntity.ok().body(eventList);
-		} else {
-			return ResponseEntity.ok().body("no such event exist");
-		}
-	}
+//
+//	@GetMapping("/searchEvent/{title}")
+//	public ResponseEntity<?> searchEvent(@PathVariable("title") String title) {
+//		List<Event> eventList = eventService.searchEvent(title);
+//		if (eventList != null) {
+//			return ResponseEntity.ok().body(eventList);
+//		} else {
+//			return ResponseEntity.ok().body("no such event exist");
+//		}
+//	}
 	
 	@PostMapping("/registerEventUser")
 	public ResponseEntity<String> registerEventUser(@RequestBody @Valid EventUsersDto eventUsersDto,  BindingResult result){

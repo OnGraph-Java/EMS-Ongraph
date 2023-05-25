@@ -121,16 +121,19 @@ public class EventServiceImpl implements EventService {
 
 	@Override
 	public List<Event> getAllEvent(Long adminId, String eventCategory, String eventType, String eventDate,
-			boolean isDashboard, int page, int size) {
+			boolean isDashboard, int page, int size, String title) {
 		
 		List<Event> eventList = new ArrayList<>();
 
 		PageRequest pageReq = PageRequest.of(page, size, Sort.by("startDate")); 
+		if(title.equals("all")) {
+			title = "";
+		}
 		if(isDashboard || !eventDate.equals("")) {
 			Date dateOfEvent = getEventDate(eventDate, isDashboard);
-			eventList = eventRepository.filterEventsDashboards(adminId, eventCategory.toLowerCase(), eventType.toLowerCase(), dateOfEvent, pageReq);
+			eventList = eventRepository.filterEventsDashboards(adminId, eventCategory.toLowerCase(), eventType.toLowerCase(), dateOfEvent, pageReq, title.toLowerCase());
 		} else {
-			eventList = eventRepository.filterEvents(adminId, eventCategory.toLowerCase(), eventType.toLowerCase(), pageReq);
+			eventList = eventRepository.filterEvents(adminId, eventCategory.toLowerCase(), eventType.toLowerCase(), pageReq, title.toLowerCase());
 		}
 
 		if (eventList != null) {

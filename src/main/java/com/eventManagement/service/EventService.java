@@ -17,7 +17,7 @@ public interface EventService {
 	
 	public String updateEvent(Long id, EventDto updatedEvent, MultipartFile[] files) throws Exception;
 	
-	List<Event> getAllEvent(Long adminId,String eventCategory,String eventType,String eventDate, boolean isDashboard, int page, int size);
+	List<Event> getAllEvent(Long adminId,String eventCategory,String eventType,String eventDate, boolean isDashboard, int page, int size, String title);
 	
 	List<Event> searchEvent(String searchText);
 

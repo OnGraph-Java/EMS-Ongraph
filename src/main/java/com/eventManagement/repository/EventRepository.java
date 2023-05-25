@@ -16,16 +16,18 @@ public interface EventRepository extends JpaRepository<Event, Long>{
 	List<Event> findEventByTitle(@Param("eventTitle") String eventTitle);
 	
 	@Query("SELECT e FROM Event e WHERE e.adminId = :adminId and LOWER(e.eventCategory) LIKE %:eventCategory% AND LOWER(e.eventType) LIKE %:eventType%"
-			+ " AND e.startDate >= :eventDate")
+			+ " AND e.startDate >= :eventDate AND LOWER(e.eventTitle) LIKE %:eventTitle%")
 	List<Event> filterEventsDashboards(@Param("adminId") Long adminId, 
 							           @Param("eventCategory") String eventCategory, 
 							           @Param("eventType") String eventType, 
 							           @Param("eventDate") Date eventDate,
-							           Pageable page);
+							           Pageable page,
+							           @Param("eventTitle") String eventTitle);
 	
-	@Query("SELECT e FROM Event e WHERE e.adminId = :adminId and LOWER(e.eventCategory) LIKE %:eventCategory% AND LOWER(e.eventType) LIKE %:eventType%")
+	@Query("SELECT e FROM Event e WHERE e.adminId = :adminId and LOWER(e.eventCategory) LIKE %:eventCategory% AND LOWER(e.eventType) LIKE %:eventType%  AND LOWER(e.eventTitle) LIKE %:eventTitle%")
 	List<Event> filterEvents(@Param("adminId") Long adminId, 
             				 @Param("eventCategory") String eventCategory, 
             				 @Param("eventType") String eventType, 
-							 Pageable page);
+							 Pageable page,
+							 @Param("eventTitle") String eventTitle);
 }

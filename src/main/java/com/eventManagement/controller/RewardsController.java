@@ -61,10 +61,11 @@ public class RewardsController {
 			@RequestParam(value = "rewardRange", defaultValue = "0") Long rewardRange,
 			@RequestParam(value = "page", defaultValue = "0") int page,
 			@RequestParam(value = "size", defaultValue = "8") int size,
-			@RequestParam(value = "sortBy", defaultValue = "createdOn") String sortBy) {
+			@RequestParam(value = "sortBy", defaultValue = "createdOn") String sortBy,
+			@RequestParam(value = "username", defaultValue = "all") String username) {
 		List<UserRewards> list = null;
 		try {
-			list = rewardService.getAllUserRewardsList(adminId, rewardRange, page, size, sortBy);
+			list = rewardService.getAllUserRewardsList(adminId, rewardRange, page, size, sortBy, username);
 		} catch (Exception ex) {
 			logger.error("exception got while fetching UserRewards : " + ex.getMessage());
 			return ResponseEntity.badRequest().body("exception got while fetching UserRewards : " + ex.getMessage());
@@ -73,19 +74,19 @@ public class RewardsController {
 
 	}
 
-	@GetMapping("/searchRewardUsers/{adminId}")
-	public ResponseEntity<?> searchRewardUsers(@PathVariable("adminId") Long adminId,
-			@RequestParam(value = "username", required = true) String username) {
-		List<UserRewards> list = null;
-		try {
-			list = rewardService.searchRewardsUserList(adminId, username);
-		} catch (Exception ex) {
-			logger.error("exception got while fetching UserRewards : " + ex.getMessage());
-			return ResponseEntity.badRequest().body(
-					"exception got while searchind User Rewards with usernmae : " + username + " : " + ex.getMessage());
-		}
-		return ResponseEntity.ok().body(list);
-	}
+//	@GetMapping("/searchRewardUsers/{adminId}")
+//	public ResponseEntity<?> searchRewardUsers(@PathVariable("adminId") Long adminId,
+//			@RequestParam(value = "username", required = true) String username) {
+//		List<UserRewards> list = null;
+//		try {
+//			list = rewardService.searchRewardsUserList(adminId, username);
+//		} catch (Exception ex) {
+//			logger.error("exception got while fetching UserRewards : " + ex.getMessage());
+//			return ResponseEntity.badRequest().body(
+//					"exception got while searchind User Rewards with usernmae : " + username + " : " + ex.getMessage());
+//		}
+//		return ResponseEntity.ok().body(list);
+//	}
 
 	@GetMapping("/getUserRewardsHistory/{userId}")
 	public ResponseEntity<?> getUserRewardsHistory(@PathVariable("userId") Long userId,

@@ -13,7 +13,7 @@ public interface RewardService {
 
 	String saveReward(@Valid RewardsDto rewardsDto);
 
-	List<UserRewards> getAllUserRewardsList(Long adminId, Long rewardRange, int page, int size, String sortBy);
+	List<UserRewards> getAllUserRewardsList(Long adminId, Long rewardRange, int page, int size, String sortBy, String username);
 
 	List<UserRewardsHistory> getAllUserRewardsHistory(Long userId);
 

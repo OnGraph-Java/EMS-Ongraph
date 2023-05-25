@@ -13,13 +13,13 @@ import com.eventManagement.model.UserRewards;
 @Repository
 public interface UserRewardsRepository extends JpaRepository<UserRewards, Long> {
 
-	@Query("Select user from UserRewards user where user.adminId = :adminId")
-	List<UserRewards> findByAdminId(@Param("adminId") Long adminId, Pageable page);
+	@Query("Select user from UserRewards user where user.adminId = :adminId AND LOWER(user.username) LIKE %:username%")
+	List<UserRewards> findByAdminId(@Param("adminId") Long adminId, Pageable page, @Param("username") String username);
 
-	@Query("Select user from UserRewards user where user.adminId = :adminId AND user.rewardPoints <= :rewardRange")
-	List<UserRewards> findByAdminIdAndReward(@Param("adminId") Long adminId, @Param("rewardRange") Long rewardRange, Pageable page);
+	@Query("Select user from UserRewards user where user.adminId = :adminId AND user.rewardPoints <= :rewardRange AND LOWER(user.username) LIKE %:username%")
+	List<UserRewards> findByAdminIdAndReward(@Param("adminId") Long adminId, @Param("rewardRange") Long rewardRange, Pageable page, String username);
 
 	@Query("Select user from UserRewards user where user.adminId = :adminId AND LOWER(user.username) LIKE :username")
-	List<UserRewards> findByAdminIdAndUserName(@Param("adminId") Long adminId, @Param("username")String username);
+	List<UserRewards> findByAdminIdAndUserName(@Param("adminId") Long adminId, @Param("username") String username);
 
 }
