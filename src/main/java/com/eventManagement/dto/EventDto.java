@@ -23,15 +23,12 @@ public class EventDto {
     private String endDate;
 	
 	@NotBlank(message = "eventCategory is null")
-    @Size(min = 2, max = 60)
 	private String eventCategory;
 	
 	@NotBlank(message = "eventType is null")
-    @Size(min = 2, max = 60)
 	private String eventType;
 	
 	@NotBlank(message = "userType is null")
-    @Size(min = 2, max = 60)
 	private String userType;
 	
 	@NotBlank(message = "location is null")

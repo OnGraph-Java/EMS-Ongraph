@@ -13,7 +13,6 @@ public class RewardsDto {
 	private Long pointPerUser;
 
 	@NotBlank(message = "activityType is null")
-    @Size(min = 2, max = 60)
 	private String activityType;
 
 	@NotBlank(message = "comments is null")

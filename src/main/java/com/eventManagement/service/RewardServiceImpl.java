@@ -31,7 +31,6 @@ public class RewardServiceImpl implements RewardService {
 
 	private Logger logger = LoggerFactory.getLogger(RewardsController.class.getName());
 
-	// SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 	DateTimeFormatter df = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
 	@Autowired
@@ -46,6 +45,7 @@ public class RewardServiceImpl implements RewardService {
 	@Override
 	@Transactional
 	public String saveReward(@Valid RewardsDto rewardsDto) {
+		logger.info("Saving Reward with details :"+rewardsDto.getActivityType());
 		String response = "";
 		Reward reward = new Reward();
 		try {
@@ -63,26 +63,9 @@ public class RewardServiceImpl implements RewardService {
 		return response;
 	}
 
-//	private void saveRewardHistory(Reward reward, int size) {
-//		try {
-//	        LocalDate currentDate = LocalDate.now();
-//
-//			RewardsHistory history = new RewardsHistory();
-//			history.setActivityType(reward.getActivityType());
-//			history.setAdminId(reward.getAdminId());
-//			history.setNumberOfUser(Long.valueOf(size));
-//			history.setPointPerUser(reward.getPointPerUser());
-//			//history.setRewardDate(sdf.parse(sdf.format(new Date())));
-//			history.setRewardDate(LocalDate.parse(currentDate.format(df), df));
-//
-//			history.setStatus("Completed");
-//			rewardsHistoryRepository.save(history);
-//		} catch (Exception ex) {
-//			logger.error("Exception got while parsing date : " + ex.getMessage());
-//		}
-//	}
 
 	private void saveUserRewards(Reward reward, List<String> rewardUserId) {
+		logger.info("Saving User Reward with Id's :"+rewardUserId.toString());
 
 		UserRewards updatedUserRewards = new UserRewards();
 		for (String userId : rewardUserId) {
@@ -114,6 +97,8 @@ public class RewardServiceImpl implements RewardService {
 
 	private void saveUserRewardHistory(UserRewards userRewardsHistory, Reward reward) {
 		LocalDate currentDate = LocalDate.now();
+		logger.info("Saving User Reward History with Id's :"+userRewardsHistory.getUserId());
+
 		UserRewardsHistory userRewardHistory = new UserRewardsHistory();
 		try {
 			userRewardHistory.setRewardId(reward.getRewardId());
@@ -142,9 +127,11 @@ public class RewardServiceImpl implements RewardService {
 
 	@Override
 	public List<UserRewards> getAllUserRewardsList(Long adminId, Long rewardRange, int page, int size, String sortBy, String username) {
-        if(username.equals("all")) {
+		if(username.equals("all")) {
         	username = "";
         }
+        logger.info("Getting user rewards with AdminId :"+adminId+" & username : "+username);
+
 		List<UserRewards> userRewardsList = null;
 		try {
 			PageRequest pageReq = PageRequest.of(page, size, Sort.by("createdOn")); 
@@ -161,6 +148,7 @@ public class RewardServiceImpl implements RewardService {
 
 	@Override
 	public List<UserRewardsHistory> getAllUserRewardsHistory(Long userId) {
+		logger.info("getting User Reward History for userID : "+userId);
 		List<UserRewardsHistory> userRewardsHistoryList = null;
 		try {
 			userRewardsHistoryList = userRewardsHistoryRepository.findByUserId(userId);
@@ -172,6 +160,8 @@ public class RewardServiceImpl implements RewardService {
 
 	@Override
 	public List<Reward> getRewardsList(Long adminId, int page, int size) {
+		logger.info("getting Rewards List for adminId : "+adminId);
+
 		List<Reward> rewardsList = null;
 
 		try {
@@ -207,7 +197,7 @@ public class RewardServiceImpl implements RewardService {
 
 	@Override
 	public String getUserRewardsPoints(Long userId) {
-
+        logger.info("Getting user rewards points for userId :"+userId);
 		Optional<UserRewards> userReward = null;
 		try {
 			userReward = userRewardsRepository.findById(userId);
@@ -223,6 +213,7 @@ public class RewardServiceImpl implements RewardService {
 
 	@Override
 	public List<UserRewardsHistory> searchUserRewardsList(Long userId, String activityType) {
+        logger.info("Searching user rewards for userId :"+userId+" with activityType :"+activityType);
 
 		List<UserRewardsHistory> userRewardList = null;
 		try {
@@ -237,6 +228,7 @@ public class RewardServiceImpl implements RewardService {
 
 	@Override
 	public List<UserRewardsHistory> getUserRewardsList(Long userId) {
+		logger.info("getting user rewards history for userId :"+userId);
 		List<UserRewardsHistory> history = null;
 		try {
 			history = userRewardsHistoryRepository.findByUserId(userId);

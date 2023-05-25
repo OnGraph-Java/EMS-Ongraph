@@ -9,6 +9,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 @Entity
 @Table
 public class UserRewardsHistory {
@@ -30,6 +32,7 @@ public class UserRewardsHistory {
 	private String activityType;
 	
 	@Column
+    @JsonFormat(pattern = "yyyy-MM-dd")
 	private LocalDate createdOn;
 
 	public Long getPoints() {

@@ -9,6 +9,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 @Entity
 @Table
 public class Event {
@@ -24,9 +28,11 @@ public class Event {
 	private String eventTitle;
 
 	@Column
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date startDate;
 
 	@Column
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date endDate;
 
 	@Column
@@ -54,9 +60,11 @@ public class Event {
 	private String imageName;
 
 	@Column
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date createdOn;
 	
 	@Column
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date lastUpdated;
 	
 	public Long getEventId() {

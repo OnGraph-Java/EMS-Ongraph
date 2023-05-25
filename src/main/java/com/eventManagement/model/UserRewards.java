@@ -14,6 +14,7 @@ import javax.persistence.SqlResultSetMapping;
 import javax.persistence.Table;
 
 import com.eventManagement.dto.RewardPoints;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Entity
 @Table
@@ -45,9 +46,11 @@ public class UserRewards {
 	private Long adminId;
 
 	@Column
+    @JsonFormat(pattern = "yyyy-MM-dd")
 	private LocalDate createdOn;
 	
 	@Column
+    @JsonFormat(pattern = "yyyy-MM-dd")
 	private LocalDate updatedOn;
 	
 	@Column

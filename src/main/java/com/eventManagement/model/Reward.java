@@ -11,6 +11,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 @Entity
 @Table
 public class Reward {
@@ -35,6 +37,7 @@ public class Reward {
 	private Long numberOfUser;
 	
 	@Column
+    @JsonFormat(pattern = "yyyy-MM-dd")
 	private LocalDate rewardDate;
 	
 	@Column

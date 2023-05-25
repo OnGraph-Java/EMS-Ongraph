@@ -9,6 +9,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 @Table
 @Entity
 public class Gift {
@@ -36,9 +38,11 @@ public class Gift {
 	private String imageName;
 	
 	@Column
+    @JsonFormat(pattern = "yyyy-MM-dd")
 	private Date createdOn;
 	
 	@Column
+    @JsonFormat(pattern = "yyyy-MM-dd")
 	private Date lastUpdated;
 
 	public Long getGiftId() {

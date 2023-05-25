@@ -20,50 +20,45 @@ import com.eventManagement.model.UserRewardsHistory;
 
 @Service
 public class RewardFilter {
-	
-	Logger logger = LoggerFactory.getLogger(RewardFilter.class);
-	
-    DateTimeFormatter df = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
+	Logger logger = LoggerFactory.getLogger(RewardFilter.class);
+
+	DateTimeFormatter df = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
 	@Autowired
 	EntityManager entityManager;
 
-
 	public List<RewardPoints> getRewardsPoints(Long adminId) {
-		
+		logger.info("Getting reward points. Admin ID: " + adminId);
 		List<RewardPoints> rewardPointsList = new ArrayList<>();
 
+		String query = "SELECT  Count(*) AS 'allUserCount', "
+				+ "  SUM(CASE WHEN ur.user_role = '301' THEN 1 ELSE 0 END) AS 'allUniversityStudents', "
+				+ "  SUM(CASE WHEN ur.user_role = '302' THEN 1 ELSE 0 END) AS 'allScholorshipStudents', "
+				+ "  SUM(CASE WHEN ur.user_role = '303' THEN 1 ELSE 0 END) AS 'allEmployees'"
+				+ "  FROM user_rewards ur " + "  WHERE ur.admin_id = :adminId";
 
-        String query = "SELECT  Count(*) AS 'allUserCount', "
-        		       + "  SUM(CASE WHEN ur.user_role = '301' THEN 1 ELSE 0 END) AS 'allUniversityStudents', "
-        		       + "  SUM(CASE WHEN ur.user_role = '302' THEN 1 ELSE 0 END) AS 'allScholorshipStudents', "
-        		       + "  SUM(CASE WHEN ur.user_role = '303' THEN 1 ELSE 0 END) AS 'allEmployees'"
-        		       + "  FROM user_rewards ur "
-        		       + "  WHERE ur.admin_id = :adminId";
-		
-    	try {
-    		rewardPointsList = entityManager.createNativeQuery(query, "RewardPointsMapping").setParameter("adminId", adminId)
-					.getResultList();
+		try {
+			rewardPointsList = entityManager.createNativeQuery(query, "RewardPointsMapping")
+					.setParameter("adminId", adminId).getResultList();
 
 		} catch (Exception ex) {
 			logger.error("Exception while getting statList: " + ex.getMessage());
 		}
-
+		logger.info("Retrieved reward points successfully. Admin ID: " + adminId);
 		return rewardPointsList;
-		
-	}
 
+	}
 
 	public List<UserRewardsHistory> getUserRewardsHistory(Long userId, String activityType, String fromDate,
 			String endDate, int page, int size) {
-		
+		logger.info("Fetching user rewards history. User ID: " + userId);
 		List<UserRewardsHistory> userRewardList = new ArrayList<>();
 		LocalDate localStartdate = null;
 		LocalDate localEnddate = null;
 
 		String query = "Select user from UserRewardsHistory user where user.userId = :userId";
-		
+
 		if (activityType != null && !activityType.equals("all")) {
 			query = query + " AND LOWER(user.activityType) like :activityType";
 		}
@@ -75,14 +70,14 @@ public class RewardFilter {
 			localEnddate = LocalDate.parse(endDate, df);
 			query = query + " AND user.createdOn <= :localEnddate";
 		}
-		
+
 		TypedQuery<UserRewardsHistory> rewardQuery = entityManager.createQuery(query, UserRewardsHistory.class);
-        
-		rewardQuery.setParameter("userId",userId);
-		
+
+		rewardQuery.setParameter("userId", userId);
+
 		if (activityType != null && !activityType.equals("all")) {
 			activityType = activityType.toLowerCase();
-			activityType = "%"+activityType+"%";
+			activityType = "%" + activityType + "%";
 			rewardQuery.setParameter("activityType", activityType);
 		}
 		if (fromDate != null && !fromDate.equals("all")) {
@@ -91,7 +86,7 @@ public class RewardFilter {
 		if (endDate != null && !endDate.equals("all")) {
 			rewardQuery.setParameter("localEnddate", localEnddate);
 		}
-		
+
 		try {
 			userRewardList = rewardQuery.getResultList();
 
@@ -99,12 +94,13 @@ public class RewardFilter {
 			logger.error("Exception while getting statList: " + ex.getMessage());
 		}
 
-        int startIndex = page * size;
-        int endIndex = Math.min(startIndex + size, userRewardList.size());
-        if (startIndex >= userRewardList.size()) {
-            return Collections.emptyList();
-        }
-        return userRewardList.subList(startIndex, endIndex);
+		int startIndex = page * size;
+		int endIndex = Math.min(startIndex + size, userRewardList.size());
+		if (startIndex >= userRewardList.size()) {
+			return Collections.emptyList();
+		}
+		logger.info("User rewards history fetched successfully. User ID: " + userId);
+		return userRewardList.subList(startIndex, endIndex);
 	}
 
 }

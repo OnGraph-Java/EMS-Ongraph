@@ -23,8 +23,7 @@ public class EventUsersDto {
     @Size(min = 2, max = 20)
 	private String name;
 
-	@NotBlank(message = "userType is null")
-    @Size(min = 2, max = 20)
+	@NotNull(message = "userType is null")
 	private String userType;
 
 	@NotBlank(message = "phoneNo is null")
