@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -134,9 +135,11 @@ public class EventController {
 	}
 	
 	@GetMapping("/getEventUsers/{eventId}")
-	public ResponseEntity<?> getEventRegisterUsers(@PathVariable("eventId") Long eventId){
-		List<EventUsers> eventUserList = eventService.getEventRegisterUsers(eventId);
-		if (eventUserList != null && eventUserList.size() > 0) {
+	public ResponseEntity<?> getEventRegisterUsers(@PathVariable("eventId") Long eventId,
+			@RequestParam(value = "page", defaultValue = "0") int page,
+			@RequestParam(value = "size", defaultValue = "7") int size){
+		Page<EventUsers> eventUserList = eventService.getEventRegisterUsers(eventId, page, size);
+		if (eventUserList != null) {
 			return ResponseEntity.ok().body(eventUserList);
 		} else {
 			return ResponseEntity.ok().body("no event users exist");
@@ -146,7 +149,7 @@ public class EventController {
 	@GetMapping("/exportEventUsers/{eventId}")
 	public ResponseEntity<?> exportEventRegisterUsers(@PathVariable("eventId") Long eventId, HttpServletResponse response){
 		try {
-			List<EventUsers> eventUserList = eventService.getEventRegisterUsers(eventId);
+			List<EventUsers> eventUserList = eventService.getExportEventRegisterUsers(eventId);
 			if (eventUserList != null && eventUserList.size() > 0) {
 				generateExportFile(eventUserList, response);
 				return ResponseEntity.ok().body(eventUserList);

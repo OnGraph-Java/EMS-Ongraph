@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.eventManagement.dto.EventDto;
@@ -25,6 +26,8 @@ public interface EventService {
 
 	public String registerEventUser(@Valid EventUsersDto eventUsersDto);
 
-	public List<EventUsers> getEventRegisterUsers(Long eventId);
+	public Page<EventUsers> getEventRegisterUsers(Long eventId, int page, int size);
+
+	public List<EventUsers> getExportEventRegisterUsers(Long eventId);
 	
 }

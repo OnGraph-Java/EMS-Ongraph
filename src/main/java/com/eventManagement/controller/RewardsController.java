@@ -11,6 +11,7 @@ import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.eventManagement.dto.RewardPoints;
 import com.eventManagement.dto.RewardsDto;
+import com.eventManagement.model.PageEntity;
 import com.eventManagement.model.Reward;
 import com.eventManagement.model.UserRewards;
 import com.eventManagement.model.UserRewardsHistory;
@@ -63,7 +65,7 @@ public class RewardsController {
 			@RequestParam(value = "size", defaultValue = "8") int size,
 			@RequestParam(value = "sortBy", defaultValue = "createdOn") String sortBy,
 			@RequestParam(value = "username", defaultValue = "all") String username) {
-		List<UserRewards> list = null;
+		Page<UserRewards> list = null;
 		try {
 			list = rewardService.getAllUserRewardsList(adminId, rewardRange, page, size, sortBy, username);
 		} catch (Exception ex) {
@@ -93,10 +95,10 @@ public class RewardsController {
 			@RequestParam(value = "activityType", required = false, defaultValue = "all") String activityType,
 			@RequestParam(value = "fromDate", required = false, defaultValue = "all") String fromDate,
 			@RequestParam(value = "endDate", required = false, defaultValue = "all") String endDate,
-			@RequestParam(value = "page", defaultValue = "0") int page,
+			@RequestParam(value = "page", defaultValue = "1") int page,
 			@RequestParam(value = "size", defaultValue = "8") int size) {
 
-		List<UserRewardsHistory> list = null;
+		PageEntity<UserRewardsHistory> list = null;
 		try {
 			list = rewardFilter.getUserRewardsHistory(userId, activityType, fromDate, endDate, page, size);
 		} catch (Exception ex) {
@@ -139,9 +141,9 @@ public class RewardsController {
 	public ResponseEntity<?> getRewardsHistory(@PathVariable("adminId") Long adminId,
 			                              @RequestParam(defaultValue = "0") int page,
 	                                      @RequestParam(defaultValue = "8") int size) {
-		List<Reward> list = null;
+		Page<Reward> list = null;
 		try {
-			list = rewardService.getRewardsList(adminId, page, size);
+			list = rewardService.getRewardsListPage(adminId, page, size);
 		} catch (Exception ex) {
 			logger.error("exception got while fetching Rewards History : " + ex.getMessage());
 			return ResponseEntity.badRequest().body("exception got while fetching Rewards History: " + ex.getMessage());
@@ -166,7 +168,7 @@ public class RewardsController {
 
 		List<Reward> rewardlist = null;
 		try {
-			rewardlist = rewardService.getRewardsList(adminId, 0, 0);
+			rewardlist = rewardService.getRewardsListExport(adminId);
 			generateExportFile(rewardlist, response);
 
 		} catch (Exception ex) {
