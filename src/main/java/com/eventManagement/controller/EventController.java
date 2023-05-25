@@ -152,7 +152,7 @@ public class EventController {
   	  @RequestParam(value = "page", defaultValue = "0") int page,
 			@RequestParam(value = "size", defaultValue = "7") int size) {
 		Page<EventUsers> eventUserList = eventService.getEventRegisterUsers(eventId, page, size);
-		if (eventUserList != null && eventUserList.size() > 0) {
+		if (eventUserList != null) {
 			return ResponseEntity.ok().body(eventUserList);
 		} else {
 			return ResponseEntity.ok().body("no event users exist");
