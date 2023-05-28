@@ -98,7 +98,7 @@ public class RewardFilter {
 
 			CriteriaQuery<Long> countQuery = entityManager.getCriteriaBuilder().createQuery(Long.class);
 			countQuery.select(entityManager.getCriteriaBuilder().count(countQuery.from(UserRewardsHistory.class)));
-			long totalElements = entityManager.createQuery(countQuery).getSingleResult();
+			long totalElements = entityManager.createQuery(countQuery).getFirstResult();
 
 			PageEntity<UserRewardsHistory> pageObj = new PageEntity<UserRewardsHistory>(userRewardList, page, size,
 					totalElements);

@@ -31,4 +31,7 @@ public interface RewardService {
 
 	List<UserRewardsHistory> getUserRewardsList(Long userId);
 
+	Page<UserRewardsHistory> getUserRewardsHistory(Long userId, String activityType, String fromDate, String endDate,
+			int page, int size);
+
 }

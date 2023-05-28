@@ -17,6 +17,6 @@ public interface GiftService {
 
 	Gift findGift(Long giftId);
 
-	List<Gift> findAllGift(Long adminId, String sortBy, String title);
+	List<Gift> findAllGift(Long adminId, String sortBy, String title, boolean isDashboard);
 
 }

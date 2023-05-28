@@ -16,6 +16,8 @@ import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -67,32 +69,33 @@ public class GiftServiceImpl implements GiftService {
 				return "No such gift exists";
 			}
 			Gift updatedGift = parseGiftDto(gift.get(), giftDto);
-			String imageName = saveFileInSystem(file);
+//			String imageName = saveFileInSystem(file);
+//			updatedGift.setImageName(imageName);
+
 			updatedGift.setLastUpdated(sdf.parse(sdf.format(new Date())));
-			updatedGift.setImageName(imageName);
 			giftRepository.save(updatedGift);
 		} catch (Exception ex) {
 			logger.error("Exception got while updating gift :" + ex.getMessage());
 			return "Exception got while updating gift :" + ex.getMessage();
 		}
-	    logger.info("Update gift service ended.");
+		logger.info("Update gift service ended.");
 		return "Successfully Saved Gift";
 	}
 
 	public Gift parseGiftDto(Gift gift, GiftDto giftDto) {
-	    logger.info("Parsing GiftDto to Gift object");
+		logger.info("Parsing GiftDto to Gift object");
 		gift.setGiftTitle(giftDto.getGiftTitle());
 		gift.setRedeemRequirePoints(giftDto.getRedeemRequirePoints());
 		gift.setAdminId(giftDto.getAdminId());
 		gift.setAvailableFor(giftDto.getAvailableFor());
 		gift.setGiftDetail(giftDto.getGiftDetail());
-	    logger.info("GiftDto parsed successfully");
+		logger.info("GiftDto parsed successfully");
 		return gift;
 	}
 
 	public String saveFileInSystem(MultipartFile file) throws Exception {
 		logger.info("Savefile in system service started :");
-		String UPLOAD_DIR = "event\\images\\";
+		String UPLOAD_DIR = "event//images//";
 		String fileName = StringUtils.cleanPath(file.getOriginalFilename());
 		try {
 			Path path = Paths.get(UPLOAD_DIR + fileName);
@@ -114,7 +117,7 @@ public class GiftServiceImpl implements GiftService {
 		try {
 			gift = giftRepository.findById(giftId).get();
 			String str = gift.getImageName();
-			str = projectlocalPath + "\\" + str;
+			str = projectlocalPath + "//" + str;
 			gift.setImageName(str);
 			logger.info("Find gift service ended :");
 
@@ -125,15 +128,18 @@ public class GiftServiceImpl implements GiftService {
 	}
 
 	@Override
-	public List<Gift> findAllGift(Long adminId, String sortBy, String title) {
+	public List<Gift> findAllGift(Long adminId, String sortBy, String title, boolean isDashboard) {
 		logger.info("Find all gift service started :");
 		List<Gift> giftList;
-
-		giftList = giftRepository.findAllGiftByAdminId(adminId, sortBy, title.toLowerCase());
-
+		if (isDashboard) {
+			PageRequest pageReq = PageRequest.of(0, 5);
+			giftList = giftRepository.findAllGiftByAdminIdPage(adminId, sortBy, title.toLowerCase(), pageReq);
+		} else {
+			giftList = giftRepository.findAllGiftByAdminId(adminId, sortBy, title.toLowerCase());
+		}
 		for (Gift gift : giftList) {
 			String str = gift.getImageName();
-			str = projectlocalPath + "\\" + str;
+			str = projectlocalPath + "//" + str;
 			gift.setImageName(str);
 		}
 		logger.info("Find all gift service ended :");

@@ -10,6 +10,7 @@ import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +21,7 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 
 import static com.eventManagement.utils.StringUtils.getNotNullString;
@@ -36,41 +38,73 @@ public class EventController {
 	StatisticsService statisticsService;
 
 	// completed apart of event start end date/time
-	@PostMapping("/createEvent")
+	@PostMapping(value = "/createEvent",  produces = MediaType.APPLICATION_JSON_VALUE,
+		    consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
 	@ApiOperation("Create an event")
 	@ApiResponses({ @ApiResponse(code = 200, message = "Event created successfully"),
 			@ApiResponse(code = 400, message = "Bad request") })
-	public ResponseEntity<String> createEvent(@RequestPart("files") MultipartFile[] files,
+	public ResponseEntity<HashMap<String, String>> createEvent(@RequestPart("files") MultipartFile[] files,
 			@RequestPart("data") @Valid EventDto event, BindingResult result) {
+		HashMap<String, String> res = new HashMap<>();
 
 		if (result.hasErrors()) {
 			StringBuilder errorMessage = new StringBuilder();
+		    result.getFieldErrors().forEach(error -> {
+		        String fieldName = error.getField();
+		        String defaultMessage = error.getDefaultMessage();
+		        errorMessage.append(fieldName).append(": ").append(defaultMessage).append(". ");
+		    });
+		    res.put("response", errorMessage.toString());
 			result.getAllErrors().forEach(error -> errorMessage.append(error.getDefaultMessage()).append(". "));
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage.toString());
+			res.put("response", errorMessage.toString());
+
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
 		}
 		String response = "";
 		try {
+		
 			response = eventService.createEvent(files, event);
+			res.put("response", response);
+
 		} catch (Exception ex) {
-			return ResponseEntity.badRequest().body(ex.getMessage());
+			res.put("response", ex.getMessage());
+
+			return ResponseEntity.badRequest().body(res);
 		}
-		return ResponseEntity.ok().body(response);
+		return ResponseEntity.ok().body(res);
 	}
 
-	@PostMapping("/updateEvent/{id}")
-	@ApiOperation("Update an event")
+	@PostMapping(value="/updateEvent/{id}",  produces = MediaType.APPLICATION_JSON_VALUE,
+		    consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+	@ApiOperation(value="Update an event", consumes = "multipart/form-data")
 	@ApiResponses({ @ApiResponse(code = 200, message = "Event updated successfully"),
 			@ApiResponse(code = 400, message = "Bad request") })
-	public ResponseEntity<String> updateEvent(@PathVariable("id") Long id, @RequestPart("files") MultipartFile[] files,
-			@RequestPart("data") @Valid EventDto event) {
+	public ResponseEntity<HashMap<String, String>> updateEvent(@PathVariable("id") Long id, @RequestPart(value="files", required = false) MultipartFile[] files,
+			@RequestPart("data") @Valid EventDto event, BindingResult result) {
+		HashMap<String, String> res = new HashMap<>();
 
+		if (result.hasErrors()) {
+			StringBuilder errorMessage = new StringBuilder();
+		    result.getFieldErrors().forEach(error -> {
+		        String fieldName = error.getField();
+		        String defaultMessage = error.getDefaultMessage();
+		        errorMessage.append(fieldName).append(": ").append(defaultMessage).append(". ");
+		    });
+		    res.put("response", errorMessage.toString());
+			result.getAllErrors().forEach(error -> errorMessage.append(error.getDefaultMessage()).append(". "));
+			res.put("response", errorMessage.toString());
+
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+		}
 		String response = "";
 		try {
 			response = eventService.updateEvent(id, event, files);
+			res.put("response", response);
 		} catch (Exception ex) {
-			return ResponseEntity.badRequest().body(ex.getMessage());
+			res.put("response", ex.getMessage());
+			return ResponseEntity.badRequest().body(res);
 		}
-		return ResponseEntity.ok().body(response);
+		return ResponseEntity.ok().body(res);
 	}
 
 	@GetMapping("/getAllEvent/{adminId}")
@@ -83,12 +117,9 @@ public class EventController {
 			@ApiParam(value = "Event type") @RequestParam(value = "eventType", defaultValue = "", required = false) String eventType,
 			@ApiParam(value = "Event date") @RequestParam(value = "eventDate", defaultValue = "", required = false) String eventDate,
 			@ApiParam(value = "Is dashboard") @RequestParam(value = "isDashboard", required = false) boolean isDashboard,
-			@ApiParam(value = "Page number", example = "0") @RequestParam(value = "page", defaultValue = "0") int page,
-			@ApiParam(value = "Page size", example = "8") @RequestParam(value = "size", defaultValue = "8") int size,
 			@ApiParam(value = "Event title") @RequestParam(value = "title", defaultValue = "all") String title) {
 
-		List<Event> eventList = eventService.getAllEvent(adminId, eventCategory, eventType, eventDate, isDashboard,
-				page, size, title);
+		List<Event> eventList = eventService.getAllEvent(adminId, eventCategory, eventType, eventDate, isDashboard, title);
 		if (eventList != null) {
 			return ResponseEntity.ok().body(eventList);
 		} else {
@@ -104,11 +135,7 @@ public class EventController {
 	})
 	public ResponseEntity<?> getEvent(@PathVariable("eventId") @ApiParam(value = "Event ID", example = "123") Long eventId) {
 		Event event = eventService.getEvent(eventId);
-		if (event != null) {
-			return ResponseEntity.ok().body(event);
-		} else {
-			return ResponseEntity.ok().body("no such event exist");
-		}
+		return ResponseEntity.ok().body(event);
 	}
 
 //
@@ -126,21 +153,26 @@ public class EventController {
 	@ApiOperation("Register an event user")
 	@ApiResponses({ @ApiResponse(code = 200, message = "Event user registered successfully"),
 			@ApiResponse(code = 400, message = "Bad request") })
-	public ResponseEntity<String> registerEventUser(@RequestBody @Valid EventUsersDto eventUsersDto,
+	public ResponseEntity<?> registerEventUser(@RequestBody @Valid EventUsersDto eventUsersDto,
 			BindingResult result) {
+		HashMap<String, String> res = new HashMap<>();
+
 		String respose = "";
 		if (result.hasErrors()) {
 			// Build error message and return bad request response
 			StringBuilder errorMessage = new StringBuilder();
-			result.getAllErrors().forEach(error -> errorMessage.append(error.getDefaultMessage()).append(". "));
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage.toString());
+			result.getAllErrors().forEach(error -> errorMessage.append(error.getDefaultMessage()).append(","));
+			res.put("response", errorMessage.toString());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
 		}
 		try {
 			respose = eventService.registerEventUser(eventUsersDto);
+			res.put("response", respose);
 		} catch (Exception ex) {
-			return ResponseEntity.badRequest().body(ex.getMessage());
+			res.put("response", ex.getMessage());
+			return ResponseEntity.badRequest().body(res);
 		}
-		return ResponseEntity.ok().body(respose);
+		return ResponseEntity.ok().body(res);
 	}
 
 	@GetMapping("/getEventUsers/{eventId}")
@@ -155,7 +187,9 @@ public class EventController {
 		if (eventUserList != null) {
 			return ResponseEntity.ok().body(eventUserList);
 		} else {
-			return ResponseEntity.ok().body("no event users exist");
+			HashMap<String, String> res = new HashMap<>();
+			res.put("response", "no event users exist");
+			return ResponseEntity.ok().body(res);
 		}
 	}
 
@@ -170,9 +204,11 @@ public class EventController {
 			List<EventUsers> eventUserList = eventService.getExportEventRegisterUsers(eventId);
 			if (eventUserList != null && eventUserList.size() > 0) {
 				generateExportFile(eventUserList, response);
-				return ResponseEntity.ok().body(eventUserList);
+				return ResponseEntity.ok().body("");
 			} else {
-				return ResponseEntity.ok().body("no events found");
+				HashMap<String, String> res = new HashMap<>();
+				res.put("response", "no events found");
+				return ResponseEntity.ok().body(res);
 			}
 		} catch (Exception ex) {
 			return ResponseEntity.badRequest().body(ex.getMessage());

@@ -3,6 +3,7 @@ package com.eventManagement.service;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -246,5 +247,40 @@ public class RewardServiceImpl implements RewardService {
 			logger.error("Exception got while fetching user reward with id userId : " + userId);
 		}
 		return history;
+	}
+
+	@Override
+	public Page<UserRewardsHistory> getUserRewardsHistory(Long userId, String activityType, String fromDate,
+			String endDate, int page, int size) {
+		
+		DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+		Page<UserRewardsHistory> userRewardList = null;
+		LocalDate localStartdate = null;
+		LocalDate localEnddate = null;
+		
+		Pageable pageable = PageRequest.of(page, size);
+		
+		if (fromDate != null && !fromDate.equals("all")) {
+			localStartdate = LocalDate.parse(fromDate, df);
+		}
+		if (endDate != null && !endDate.equals("all")) {
+			localEnddate = LocalDate.parse(endDate, df);
+		}
+        if(activityType.equalsIgnoreCase("all")) {
+        	activityType = "";
+        }
+		
+		if (localStartdate == null && localEnddate == null) {
+			userRewardList = userRewardsHistoryRepository.filterUserRewardsHistory(userId,activityType.toLowerCase(),pageable);
+		} else if (localStartdate != null && localEnddate != null) {
+			userRewardList = userRewardsHistoryRepository.filterUserRewardsHistoryWithDates(userId,activityType.toLowerCase(),localStartdate,localEnddate,pageable);
+		} else if (localStartdate != null) {
+			userRewardList = userRewardsHistoryRepository.filterUserRewardsHistoryWithStartDate(userId,activityType.toLowerCase(),localStartdate,pageable);
+		} else if (localEnddate != null) {
+			userRewardList = userRewardsHistoryRepository.filterUserRewardsHistoryWithEndDate(userId,activityType.toLowerCase(),localEnddate,pageable);
+		}
+		
+		return userRewardList;
 	}
 }

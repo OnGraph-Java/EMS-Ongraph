@@ -8,10 +8,15 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -20,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -36,7 +42,8 @@ import com.eventManagement.repository.EventUsersRepository;
 public class EventServiceImpl implements EventService {
 
 	private Logger logger = LoggerFactory.getLogger(EventServiceImpl.class.getName());
-	SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+	
+	DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 	public static String projectlocalPath = System.getProperty("user.dir");
 
@@ -49,6 +56,8 @@ public class EventServiceImpl implements EventService {
 	@Override
 	public String createEvent(MultipartFile[] files, EventDto eventDto) {
 		// need a method to validate eventDto
+		LocalDateTime currentDate = LocalDateTime.now();
+
 		logger.info("Started creating event with name :" + eventDto.getEventTitle());
 		try {
 			Event event = new Event();
@@ -63,7 +72,7 @@ public class EventServiceImpl implements EventService {
 			sb.deleteCharAt(sb.length() - 1);
 
 			event.setImageName(sb.toString());
-			event.setCreatedOn(sdf.parse(sdf.format(new Date())));
+			event.setCreatedOn(LocalDateTime.parse(currentDate.format(df), df));
 
 			eventRepository.save(event);
 		} catch (Exception ex) {
@@ -76,21 +85,23 @@ public class EventServiceImpl implements EventService {
 	@Override
 	public String updateEvent(Long id, EventDto eventDto, MultipartFile[] files) throws Exception {
 		logger.info("Upadting Event With info : " + eventDto.getEventTitle());
+		LocalDateTime currentDate = LocalDateTime.now();
+
 		try {
 			Event event = eventRepository.findById(id).get();
 			if (event == null) {
 				throw new Exception("Event not found");
 			}
 			event = parseEvent(event, eventDto);
-			List<String> imageNames = saveFileInSystem(files);
-
-			StringBuilder sb = new StringBuilder();
-			for (String s : imageNames) {
-				sb.append(s).append(",");
-			}
-			sb.deleteCharAt(sb.length() - 1);
-			event.setImageName(sb.toString());
-			event.setLastUpdated(sdf.parse(sdf.format(new Date())));
+//			List<String> imageNames = saveFileInSystem(files);
+//
+//			StringBuilder sb = new StringBuilder();
+//			for (String s : imageNames) {
+//				sb.append(s).append(",");
+//			}
+//			sb.deleteCharAt(sb.length() - 1);
+//			event.setImageName(sb.toString());
+			event.setLastUpdated(LocalDateTime.parse(currentDate.format(df), df));
 			eventRepository.save(event);
 
 		} catch (Exception ex) {
@@ -102,17 +113,18 @@ public class EventServiceImpl implements EventService {
 	}
 
 	private Event parseEvent(Event event, EventDto eventDto) throws ParseException {
+		LocalDateTime currentDate = LocalDateTime.now();
 
 		event.setAdminId(Long.parseLong(eventDto.getAdminId()));
 		event.setAddress(eventDto.getAddress());
-		event.setStartDate(sdf.parse(sdf.format((sdf.parse(eventDto.getStartDate())))));
-		event.setEndDate(sdf.parse(sdf.format((sdf.parse(eventDto.getEndDate())))));
+		event.setStartDate(LocalDateTime.parse(currentDate.format(df), df));
+		event.setEndDate(LocalDateTime.parse(currentDate.format(df), df));
 		event.setEventCategory(eventDto.getEventCategory());
 		event.setEventDetails(eventDto.getEventDetails());
 		event.setEventTitle(eventDto.getEventTitle());
 		event.setEventType(eventDto.getEventType());
 		event.setLink(eventDto.getLink());
-
+		event.setEventRewardPoints(eventDto.getEventRewardPoints());
 		event.setLocation(eventDto.getLocation());
 		event.setUserType(eventDto.getUserType());
 		return event;
@@ -120,22 +132,30 @@ public class EventServiceImpl implements EventService {
 
 	@Override
 	public List<Event> getAllEvent(Long adminId, String eventCategory, String eventType, String eventDate,
-			boolean isDashboard, int page, int size, String title) {
+			boolean isDashboard, String title) {
 		if (title.equals("all")) {
 			title = "";
 		}
 		logger.info("Getting event for Admin : " + adminId + " and Eventtitle : " + title);
-		List<Event> eventList = new ArrayList<>();
+		List<Event> eventList;
 
-		PageRequest pageReq = PageRequest.of(page, size, Sort.by("startDate"));
-
-		if (isDashboard || !eventDate.equals("")) {
-			Date dateOfEvent = getEventDate(eventDate, isDashboard);
-			eventList = eventRepository.filterEventsDashboards(adminId, eventCategory.toLowerCase(),
-					eventType.toLowerCase(), dateOfEvent, pageReq, title.toLowerCase());
+		if (isDashboard) {
+			Pageable pageable = PageRequest.of(0, 5);
+			LocalDateTime dateOfEvent = getEventDate(eventDate, isDashboard);
+            
+			eventList = eventRepository.findFirst5Event(adminId, eventCategory.toLowerCase(),
+					eventType.toLowerCase(), dateOfEvent, title.toLowerCase(), pageable);
+			// List<Event> eventListStream =
+			// eventList.getContent().stream().limit(5).collect(Collectors.toList());
 		} else {
-			eventList = eventRepository.filterEvents(adminId, eventCategory.toLowerCase(), eventType.toLowerCase(),
-					pageReq, title.toLowerCase());
+			if (!eventDate.equals("")) {
+				LocalDateTime dateOfEvent = getEventDate(eventDate, false);
+				eventList = eventRepository.filterEventsWithDate(adminId, eventCategory.toLowerCase(),
+						eventType.toLowerCase(), title.toLowerCase(), dateOfEvent);
+			} else {
+				eventList = eventRepository.filterEvents(adminId, eventCategory.toLowerCase(), eventType.toLowerCase(),
+						title.toLowerCase());
+			}
 		}
 
 		if (eventList != null) {
@@ -143,7 +163,7 @@ public class EventServiceImpl implements EventService {
 			for (Event event : eventList) {
 				String[] images = event.getImageName().split(",");
 				for (String str : images) {
-					str = projectlocalPath + "\\" + str;
+					str = projectlocalPath + "//" + str;
 					images[i] = str;
 					i++;
 				}
@@ -160,21 +180,19 @@ public class EventServiceImpl implements EventService {
 		return eventList;
 	}
 
-	private Date getEventDate(String eventDate, boolean isDashboard) {
-		Date date = null;
+	private LocalDateTime getEventDate(String eventDate, boolean isDashboard) {
+		LocalDateTime currentDate = LocalDateTime.now();
 
 		try {
 			if (isDashboard && eventDate.equals("")) {
-				return sdf.parse(sdf.format(new Date()));
+				return LocalDateTime.parse(currentDate.format(df), df);
 			}
-			SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-			date = sdf.parse(eventDate);
-		} catch (ParseException pe) {
-			logger.error("Error occure while parsing date: " + pe.getMessage());
+			
+			currentDate = LocalDateTime.parse(eventDate, df);
 		} catch (Exception ex) {
 			logger.error("Error occure while parsing date: " + ex.getMessage());
 		}
-		return date;
+		return currentDate;
 	}
 
 	@Override
@@ -192,7 +210,7 @@ public class EventServiceImpl implements EventService {
 	public List<String> saveFileInSystem(MultipartFile[] files) throws Exception {
 
 		List<String> fileNames = new ArrayList<>();
-		String UPLOAD_DIR = "event\\images\\";
+		String UPLOAD_DIR = "event//images//";
 		for (MultipartFile file : files) {
 			String fileName = StringUtils.cleanPath(file.getOriginalFilename());
 			try {
@@ -216,7 +234,7 @@ public class EventServiceImpl implements EventService {
 		try {
 			event = eventRepository.findById(eventId).get();
 			String str = event.getImageName();
-			str = projectlocalPath + "\\" + str;
+			str = projectlocalPath + "//" + str;
 			event.setImageName(str);
 			return event;
 		} catch (Exception ex) {
@@ -229,6 +247,7 @@ public class EventServiceImpl implements EventService {
 	public String registerEventUser(@Valid EventUsersDto eventUsersDto) {
 		logger.info("Registering Event user for event :" + eventUsersDto.getEventId());
 		String response = "";
+		LocalDate currentDate = LocalDate.now();
 
 		try {
 			Optional<Event> event = eventRepository.findById(eventUsersDto.getEventId());
@@ -240,7 +259,7 @@ public class EventServiceImpl implements EventService {
 					return response;
 				}
 				eventUser = parseEventUser(eventUsersDto);
-				eventUser.setCreatedOn(sdf.parse(sdf.format(new Date())));
+				eventUser.setCreatedOn(LocalDate.parse(currentDate.format(df), df));
 				eventUsersRepository.save(eventUser);
 				response = "Successfully register user for event";
 			} else {

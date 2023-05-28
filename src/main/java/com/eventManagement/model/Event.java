@@ -1,5 +1,6 @@
 package com.eventManagement.model;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -29,11 +30,11 @@ public class Event {
 
 	@Column
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	private Date startDate;
+	private LocalDateTime startDate;
 
 	@Column
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	private Date endDate;
+	private LocalDateTime endDate;
 
 	@Column
 	private String eventCategory;
@@ -58,14 +59,17 @@ public class Event {
 
 	@Column
 	private String imageName;
+	
+	@Column
+	private Long eventRewardPoints;
 
 	@Column
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	private Date createdOn;
+	private LocalDateTime createdOn;
 	
 	@Column
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	private Date lastUpdated;
+	private LocalDateTime lastUpdated;
 	
 	public Long getEventId() {
 		return eventId;
@@ -91,19 +95,19 @@ public class Event {
 		this.eventTitle = eventTitle;
 	}
 
-	public Date getStartDate() {
+	public LocalDateTime getStartDate() {
 		return startDate;
 	}
 
-	public void setStartDate(Date startDate) {
+	public void setStartDate(LocalDateTime startDate) {
 		this.startDate = startDate;
 	}
 
-	public Date getEndDate() {
+	public LocalDateTime getEndDate() {
 		return endDate;
 	}
 
-	public void setEndDate(Date endDate) {
+	public void setEndDate(LocalDateTime endDate) {
 		this.endDate = endDate;
 	}
 
@@ -175,7 +179,7 @@ public class Event {
 		super();
 	}
 
-	public Event(Long adminId, String eventTitle, Date startDate, Date endDate, String eventCategory,
+	public Event(Long adminId, String eventTitle, LocalDateTime startDate, LocalDateTime endDate, String eventCategory,
 			String eventType, String userType, String location, String address, String link, String eventDetails,
 			String imageName) {
 		super();
@@ -193,19 +197,27 @@ public class Event {
 		this.imageName = imageName;
 	}
 
-	public Date getCreatedOn() {
+	public LocalDateTime getCreatedOn() {
 		return createdOn;
 	}
 
-	public void setCreatedOn(Date createdOn) {
+	public void setCreatedOn(LocalDateTime createdOn) {
 		this.createdOn = createdOn;
 	}
 
-	public Date getLastUpdated() {
+	public LocalDateTime getLastUpdated() {
 		return lastUpdated;
 	}
 
-	public void setLastUpdated(Date lastUpdated) {
+	public void setLastUpdated(LocalDateTime lastUpdated) {
 		this.lastUpdated = lastUpdated;
+	}
+
+	public Long getEventRewardPoints() {
+		return eventRewardPoints;
+	}
+
+	public void setEventRewardPoints(Long eventRewardPoints) {
+		this.eventRewardPoints = eventRewardPoints;
 	}
 }

@@ -1,5 +1,6 @@
 package com.eventManagement.model;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -13,6 +14,7 @@ import javax.persistence.SqlResultSetMapping;
 import javax.persistence.Table;
 
 import com.eventManagement.dto.Statistics;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 
 @Entity
@@ -65,7 +67,8 @@ public class EventUsers {
 	private String registrationDate;
 
 	@Column
-	private Date createdOn;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	private LocalDate createdOn;
 	
 	public EventUsers() {}
 	
@@ -151,11 +154,11 @@ public class EventUsers {
 		this.adminId = adminId;
 	}
 
-	public Date getCreatedOn() {
+	public LocalDate getCreatedOn() {
 		return createdOn;
 	}
 
-	public void setCreatedOn(Date createdOn) {
+	public void setCreatedOn(LocalDate createdOn) {
 		this.createdOn = createdOn;
 	}
 

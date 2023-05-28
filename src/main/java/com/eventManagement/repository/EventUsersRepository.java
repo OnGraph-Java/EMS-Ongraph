@@ -14,12 +14,12 @@ import com.eventManagement.model.EventUsers;
 @Repository
 public interface EventUsersRepository extends PagingAndSortingRepository<EventUsers, Long> {
 
-	@Query("SELECT e FROM  EventUsers e WHERE e.userId = :userId AND e.eventId = :eventId")
+	@Query("SELECT e FROM  EventUsers e WHERE e.userId = :userId AND e.eventId = :eventId ORDER BY e.createdOn desc")
 	EventUsers findByEventByUserId(@Param("userId") Long userId, @Param("eventId") Long eventId);
 
-	@Query("SELECT e FROM  EventUsers e WHERE e.eventId = :eventId")
+	@Query("SELECT e FROM  EventUsers e WHERE e.eventId = :eventId ORDER BY e.createdOn desc")
 	List<EventUsers> findAllEventByEventId(@Param("eventId") Long eventId);
 
-	@Query("SELECT e FROM  EventUsers e WHERE e.eventId = :eventId")
+	@Query("SELECT e FROM  EventUsers e WHERE e.eventId = :eventId ORDER BY e.createdOn desc")
 	Page<EventUsers> findAllEventByEventIdPage(Long eventId, PageRequest pageReq);
 }

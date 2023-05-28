@@ -14,20 +14,20 @@ import com.eventManagement.model.EventUsers;
 
 public interface EventService {
 
-	public String createEvent(MultipartFile[] files, EventDto event);
+	String createEvent(MultipartFile[] files, EventDto event);
 	
-	public String updateEvent(Long id, EventDto updatedEvent, MultipartFile[] files) throws Exception;
+	String updateEvent(Long id, EventDto updatedEvent, MultipartFile[] files) throws Exception;
 	
-	List<Event> getAllEvent(Long adminId,String eventCategory,String eventType,String eventDate, boolean isDashboard, int page, int size, String title);
+	List<Event> getAllEvent(Long adminId,String eventCategory,String eventType,String eventDate, boolean isDashboard, String title);
 	
 	List<Event> searchEvent(String searchText);
 
-	public Event getEvent(Long eventId);
+	Event getEvent(Long eventId);
 
-	public String registerEventUser(@Valid EventUsersDto eventUsersDto);
+	String registerEventUser(@Valid EventUsersDto eventUsersDto);
 
-	public Page<EventUsers> getEventRegisterUsers(Long eventId, int page, int size);
+	Page<EventUsers> getEventRegisterUsers(Long eventId, int page, int size);
 
-	public List<EventUsers> getExportEventRegisterUsers(Long eventId);
+	List<EventUsers> getExportEventRegisterUsers(Long eventId);
 	
 }

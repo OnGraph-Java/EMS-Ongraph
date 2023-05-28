@@ -14,11 +14,11 @@ import com.eventManagement.model.Reward;
 @Repository
 public interface RewardRepository extends PagingAndSortingRepository<Reward,Long> {
 
-	@Query("Select reward from Reward reward where reward.adminId = :adminId")
+	@Query("Select reward from Reward reward where reward.adminId = :adminId ORDER BY reward.rewardDate desc")
 	Page<Reward> findByAdminId(@Param("adminId") Long adminId, Pageable pageable);
 	
 
-	@Query("Select reward from Reward reward where reward.adminId = :adminId")
+	@Query("Select reward from Reward reward where reward.adminId = :adminId ORDER BY reward.rewardDate desc")
 	List<Reward> findByAdminId(@Param("adminId") Long adminId);
 
 }

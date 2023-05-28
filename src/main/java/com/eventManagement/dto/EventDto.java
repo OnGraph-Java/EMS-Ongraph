@@ -1,6 +1,7 @@
 package com.eventManagement.dto;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 
@@ -31,6 +32,8 @@ public class EventDto {
 	@NotBlank(message = "userType is null")
 	private String userType;
 	
+	@NotNull(message = "eventRewardPoints is null")
+	private Long eventRewardPoints;
 
 	private String location;
 
@@ -111,6 +114,11 @@ public class EventDto {
 	public void setEventDetails(String eventDetails) {
 		this.eventDetails = eventDetails;
 	}
-
+	public Long getEventRewardPoints() {
+		return eventRewardPoints;
+	}
+	public void setEventRewardPoints(Long eventRewardPoints) {
+		this.eventRewardPoints = eventRewardPoints;
+	}
 	
 }

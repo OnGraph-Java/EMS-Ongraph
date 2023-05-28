@@ -22,7 +22,7 @@ public class RewardsDto {
 	@NotNull(message = "adminId is null")
 	private Long adminId;
 
-	
+	@NotNull(message = "adminId is null")
 	private List<String> rewardUserId;
 
 

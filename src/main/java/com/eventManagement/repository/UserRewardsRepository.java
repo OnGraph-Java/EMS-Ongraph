@@ -14,13 +14,13 @@ import com.eventManagement.model.UserRewards;
 @Repository
 public interface UserRewardsRepository extends PagingAndSortingRepository<UserRewards, Long> {
 
-	@Query("Select user from UserRewards user where user.adminId = :adminId AND LOWER(user.username) LIKE %:username%")
+	@Query("Select user from UserRewards user where user.adminId = :adminId AND LOWER(user.username) LIKE %:username% ORDER BY user.createdOn desc")
 	Page<UserRewards> findByAdminId(@Param("adminId") Long adminId, Pageable page, @Param("username") String username);
 
-	@Query("Select user from UserRewards user where user.adminId = :adminId AND user.rewardPoints <= :rewardRange AND LOWER(user.username) LIKE %:username%")
+	@Query("Select user from UserRewards user where user.adminId = :adminId AND user.rewardPoints <= :rewardRange AND LOWER(user.username) LIKE %:username% ORDER BY user.createdOn desc")
 	Page<UserRewards> findByAdminIdAndReward(@Param("adminId") Long adminId, @Param("rewardRange") Long rewardRange, Pageable page, String username);
 
-	@Query("Select user from UserRewards user where user.adminId = :adminId AND LOWER(user.username) LIKE :username")
+	@Query("Select user from UserRewards user where user.adminId = :adminId AND LOWER(user.username) LIKE %:username% ORDER BY user.createdOn desc")
 	List<UserRewards> findByAdminIdAndUserName(@Param("adminId") Long adminId, @Param("username") String username);
 
 }

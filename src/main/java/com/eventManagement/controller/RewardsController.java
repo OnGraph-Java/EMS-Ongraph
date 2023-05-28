@@ -3,7 +3,9 @@ package com.eventManagement.controller;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -13,7 +15,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -50,17 +54,33 @@ public class RewardsController {
 	@ApiOperation("Save a reward")
 	@ApiResponses({ @ApiResponse(code = 200, message = "Reward saved successfully"),
 			@ApiResponse(code = 400, message = "Bad request") })
-	public ResponseEntity<String> saveReward(@RequestBody @Valid RewardsDto rewardsDto) {
-
+	public ResponseEntity<HashMap<String,String>> saveReward(@RequestBody @Valid RewardsDto rewardsDto, BindingResult result) {
+		HashMap<String, String> res = new HashMap<>();
 		String response = null;
+		if (result.hasErrors()) {
+			StringBuilder errorMessage = new StringBuilder();
+		    result.getFieldErrors().forEach(error -> {
+		        String fieldName = error.getField();
+		        String defaultMessage = error.getDefaultMessage();
+		        errorMessage.append(fieldName).append(": ").append(defaultMessage).append(". ");
+		    });
+		    res.put("response", errorMessage.toString());
+			result.getAllErrors().forEach(error -> errorMessage.append(error.getDefaultMessage()).append(". "));
+			res.put("response", errorMessage.toString());
+
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+		}
 		try {
 			response = rewardService.saveReward(rewardsDto);
+			res.put("response", response);
 		} catch (Exception ex) {
 			logger.error("Exception caught while saving reward : " + ex.getMessage());
-			return ResponseEntity.ok().body(ex.getMessage());
+			res.put("response", ex.getMessage());
+
+			return ResponseEntity.badRequest().body(res);
 		}
 
-		return ResponseEntity.ok().body(response);
+		return ResponseEntity.ok().body(res);
 	}
 
 	@GetMapping("/getAllUserRewards/{adminId}")
@@ -71,7 +91,7 @@ public class RewardsController {
 			@ApiParam(value = "Admin ID", example = "123") @PathVariable("adminId") Long adminId,
 			@ApiParam(value = "Reward range", example = "0") @RequestParam(value = "rewardRange", defaultValue = "0") Long rewardRange,
 			@ApiParam(value = "Page number") @RequestParam(value = "page", defaultValue = "0") int page,
-			@ApiParam(value = "Page size") @RequestParam(value = "size", defaultValue = "8") int size,
+			@ApiParam(value = "Page size") @RequestParam(value = "size", defaultValue = "5") int size,
 			@ApiParam(value = "Sort by") @RequestParam(value = "sortBy", defaultValue = "createdOn") String sortBy,
 			@ApiParam(value = "Username", defaultValue = "all") @RequestParam(value = "username", defaultValue = "all") String username) {
 		Page<UserRewards> list = null;
@@ -85,20 +105,6 @@ public class RewardsController {
 
 	}
 
-//	@GetMapping("/searchRewardUsers/{adminId}")
-//	public ResponseEntity<?> searchRewardUsers(@PathVariable("adminId") Long adminId,
-//			@RequestParam(value = "username", required = true) String username) {
-//		List<UserRewards> list = null;
-//		try {
-//			list = rewardService.searchRewardsUserList(adminId, username);
-//		} catch (Exception ex) {
-//			logger.error("exception got while fetching UserRewards : " + ex.getMessage());
-//			return ResponseEntity.badRequest().body(
-//					"exception got while searchind User Rewards with usernmae : " + username + " : " + ex.getMessage());
-//		}
-//		return ResponseEntity.ok().body(list);
-//	}
-
 	@GetMapping("/getUserRewardsHistory/{userId}")
 	@ApiOperation("Get user rewards history")
 	@ApiResponses({ @ApiResponse(code = 200, message = "User rewards history found"),
@@ -111,9 +117,9 @@ public class RewardsController {
 			@ApiParam(value = "Page number", defaultValue = "0") @RequestParam(value = "page", defaultValue = "0") int page,
 			@ApiParam(value = "Page size", defaultValue = "8") @RequestParam(value = "size", defaultValue = "8") int size) {
 
-		PageEntity<UserRewardsHistory> list = null;
+		Page<UserRewardsHistory> list = null;
 		try {
-			list = rewardFilter.getUserRewardsHistory(userId, activityType, fromDate, endDate, page, size);
+			list = rewardService.getUserRewardsHistory(userId, activityType, fromDate, endDate, page, size);
 		} catch (Exception ex) {
 			logger.error("exception got while fetching UserRewards History : " + ex.getMessage());
 			return ResponseEntity.badRequest()
