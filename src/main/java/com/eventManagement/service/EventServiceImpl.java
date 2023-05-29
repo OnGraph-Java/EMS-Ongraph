@@ -93,19 +93,21 @@ public class EventServiceImpl implements EventService {
 				throw new Exception("Event not found");
 			}
 			event = parseEvent(event, eventDto);
-//			List<String> imageNames = saveFileInSystem(files);
-//
-//			StringBuilder sb = new StringBuilder();
-//			for (String s : imageNames) {
-//				sb.append(s).append(",");
-//			}
-//			sb.deleteCharAt(sb.length() - 1);
-//			event.setImageName(sb.toString());
+			if (files != null && files.length > 0) {
+				List<String> imageNames = saveFileInSystem(files);
+
+				StringBuilder sb = new StringBuilder();
+				for (String s : imageNames) {
+					sb.append(s).append(",");
+				}
+				sb.deleteCharAt(sb.length() - 1);
+				event.setImageName(sb.toString());
+			}
 			event.setLastUpdated(LocalDateTime.parse(currentDate.format(df), df));
 			eventRepository.save(event);
 
 		} catch (Exception ex) {
-			logger.error("Error occurred while saving event : " + ex.getMessage());
+			logger.error("Error occurred updating saving event : " + ex.getMessage());
 			return "Error got while updating event : " + ex.getMessage();
 		}
 		return "Successfully updated event";
@@ -113,12 +115,11 @@ public class EventServiceImpl implements EventService {
 	}
 
 	private Event parseEvent(Event event, EventDto eventDto) throws ParseException {
-		LocalDateTime currentDate = LocalDateTime.now();
 
 		event.setAdminId(Long.parseLong(eventDto.getAdminId()));
 		event.setAddress(eventDto.getAddress());
-		event.setStartDate(LocalDateTime.parse(currentDate.format(df), df));
-		event.setEndDate(LocalDateTime.parse(currentDate.format(df), df));
+		event.setStartDate(LocalDateTime.parse(eventDto.getStartDate(), df));
+		event.setEndDate(LocalDateTime.parse(eventDto.getEndDate(), df));
 		event.setEventCategory(eventDto.getEventCategory());
 		event.setEventDetails(eventDto.getEventDetails());
 		event.setEventTitle(eventDto.getEventTitle());
@@ -137,12 +138,14 @@ public class EventServiceImpl implements EventService {
 			title = "";
 		}
 		logger.info("Getting event for Admin : " + adminId + " and Eventtitle : " + title);
-		List<Event> eventList;
+		List<Event> eventList = null;
 
 		if (isDashboard) {
 			Pageable pageable = PageRequest.of(0, 5);
 			LocalDateTime dateOfEvent = getEventDate(eventDate, isDashboard);
-            
+            if(dateOfEvent == null) {
+            	return new ArrayList<>();
+            }
 			eventList = eventRepository.findFirst5Event(adminId, eventCategory.toLowerCase(),
 					eventType.toLowerCase(), dateOfEvent, title.toLowerCase(), pageable);
 			// List<Event> eventListStream =
@@ -163,7 +166,7 @@ public class EventServiceImpl implements EventService {
 			for (Event event : eventList) {
 				String[] images = event.getImageName().split(",");
 				for (String str : images) {
-					str = projectlocalPath + "//" + str;
+					//str = projectlocalPath + "//" + str;
 					images[i] = str;
 					i++;
 				}
@@ -187,6 +190,16 @@ public class EventServiceImpl implements EventService {
 			if (isDashboard && eventDate.equals("")) {
 				return LocalDateTime.parse(currentDate.format(df), df);
 			}
+			if (isDashboard && !eventDate.equals("")) {
+				LocalDateTime localEventDate = LocalDateTime.parse(eventDate, df);
+				currentDate = LocalDateTime.parse(currentDate.format(df), df);
+				if(localEventDate.isBefore(currentDate)) {
+					return null;
+				}else {
+					return localEventDate;
+				}
+			}
+
 			
 			currentDate = LocalDateTime.parse(eventDate, df);
 		} catch (Exception ex) {
@@ -210,13 +223,19 @@ public class EventServiceImpl implements EventService {
 	public List<String> saveFileInSystem(MultipartFile[] files) throws Exception {
 
 		List<String> fileNames = new ArrayList<>();
-		String UPLOAD_DIR = "event//images//";
+		//Path imagePath = Paths.get("src", "main", "resources", "static", image.getOriginalFilename());
+        //Files.write(imagePath, image.getBytes());
+		String UPLOAD_DIR = "src//main//resources//static//img";
 		for (MultipartFile file : files) {
-			String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+			//String fileName = StringUtils.cleanPath(file.getOriginalFilename());
 			try {
-				Path path = Paths.get(UPLOAD_DIR + fileName);
-				Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-				fileNames.add(UPLOAD_DIR + fileName);
+				//Path path = Paths.get(UPLOAD_DIR + fileName);
+				//Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+				 String fileName = file.getOriginalFilename();
+			        Path imagePath = Path.of("src", "main", "resources", "static","img",fileName);
+			        Files.copy(file.getInputStream(), imagePath, StandardCopyOption.REPLACE_EXISTING);
+
+				fileNames.add(fileName);
 			} catch (IOException e) {
 				throw new Exception("Exception got while saving files : " + e.getMessage());
 			} catch (UncheckedIOException e) {
@@ -226,6 +245,7 @@ public class EventServiceImpl implements EventService {
 		return fileNames;
 
 	}
+	
 
 	@Override
 	public Event getEvent(Long eventId) {
@@ -234,7 +254,7 @@ public class EventServiceImpl implements EventService {
 		try {
 			event = eventRepository.findById(eventId).get();
 			String str = event.getImageName();
-			str = projectlocalPath + "//" + str;
+			//str = projectlocalPath + "//" + str;
 			event.setImageName(str);
 			return event;
 		} catch (Exception ex) {

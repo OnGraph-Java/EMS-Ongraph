@@ -69,9 +69,10 @@ public class GiftServiceImpl implements GiftService {
 				return "No such gift exists";
 			}
 			Gift updatedGift = parseGiftDto(gift.get(), giftDto);
-//			String imageName = saveFileInSystem(file);
-//			updatedGift.setImageName(imageName);
-
+			if (file != null) {
+				String imageName = saveFileInSystem(file);
+				updatedGift.setImageName(imageName);
+			}
 			updatedGift.setLastUpdated(sdf.parse(sdf.format(new Date())));
 			giftRepository.save(updatedGift);
 		} catch (Exception ex) {
