@@ -99,11 +99,11 @@ public class GiftServiceImpl implements GiftService {
 
 	public String saveFileInSystem(MultipartFile file) throws Exception {
 		logger.info("Savefile in system service started :");
-		String fileName = file.getOriginalFilename();
+		String UPLOAD_DIR = "event//images//";
+		String fileName = StringUtils.cleanPath(file.getOriginalFilename());
 		try {
-			Path imagePath = Path.of("src", "main", "resources", "static", "img", fileName);
-			Files.copy(file.getInputStream(), imagePath, StandardCopyOption.REPLACE_EXISTING);
-
+			Path path = Paths.get(UPLOAD_DIR + fileName);
+			Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
 			logger.info("Savefile in system service ended :");
 		} catch (IOException e) {
 			throw new Exception("Exception got while saving files : " + e.getMessage());
@@ -121,7 +121,6 @@ public class GiftServiceImpl implements GiftService {
 		try {
 			gift = giftRepository.findById(giftId).get();
 			String str = gift.getImageName();
-			str = str.replace("event//images//", "");
 			gift.setImageName(str);
 			logger.info("Find gift service ended :");
 
@@ -140,7 +139,10 @@ public class GiftServiceImpl implements GiftService {
 			sortBy = "redeemRequirePoints";
 		}
 		if (isDashboard) {
-			 Sort sort = Sort.by(Sort.Direction.DESC, sortBy);
+			 Sort sort = Sort.by(Sort.Direction.ASC, sortBy);
+			 if(sortBy.equals("createdOn")) {
+				 sort = Sort.by(Sort.Direction.DESC, sortBy); 
+			 }
 			PageRequest pageReq = PageRequest.of(0, 5, sort);
 			if (fromDate != null && endDate != null) {
 				LocalDate localStartDate = LocalDate.parse(fromDate, df);
@@ -159,13 +161,14 @@ public class GiftServiceImpl implements GiftService {
 				giftList = giftRepository.findAllGiftByAdminIdPage(adminId, sortBy, title.toLowerCase(), pageReq);
 			}
 		} else {
-			 Sort sort = Sort.by(Sort.Direction.DESC, sortBy);
-
+			 Sort sort = Sort.by(Sort.Direction.ASC, sortBy);
+			 if(sortBy.equals("createdOn")) {
+				 sort = Sort.by(Sort.Direction.DESC, sortBy); 
+			 }
 			giftList = giftRepository.findAllGiftByAdminId(adminId, title.toLowerCase(), sort);
 		}
 		for (Gift gift : giftList) {
 			String str = gift.getImageName();
-			str = str.replace("event//images//", "");
 			gift.setImageName(str);
 		}
 		logger.info("Find all gift service ended :");

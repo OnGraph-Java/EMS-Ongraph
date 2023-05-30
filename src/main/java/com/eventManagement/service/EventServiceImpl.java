@@ -148,8 +148,6 @@ public class EventServiceImpl implements EventService {
 			}
 			eventList = eventRepository.findFirst5Event(adminId, eventCategory.toLowerCase(), eventType.toLowerCase(),
 					dateOfEvent, title.toLowerCase(), pageable);
-			// List<Event> eventListStream =
-			// eventList.getContent().stream().limit(5).collect(Collectors.toList());
 		} else {
 			if (!eventDate.equals("")) {
 				LocalDateTime dateOfEvent = getEventDate(eventDate, false);
@@ -166,7 +164,6 @@ public class EventServiceImpl implements EventService {
 			for (Event event : eventList) {
 				String[] images = event.getImageName().split(",");
 				for (String str : images) {
-					str = str.replace("event//images//", "");
 					images[i] = str;
 					i++;
 				}
@@ -222,13 +219,12 @@ public class EventServiceImpl implements EventService {
 	public List<String> saveFileInSystem(MultipartFile[] files) throws Exception {
 
 		List<String> fileNames = new ArrayList<>();
-
+		String UPLOAD_DIR = "event//images//";
 		for (MultipartFile file : files) {
+			String fileName = StringUtils.cleanPath(file.getOriginalFilename());
 			try {
-				String fileName = file.getOriginalFilename();
-				Path imagePath = Path.of("src", "main", "resources", "static", "img", fileName);
-				Files.copy(file.getInputStream(), imagePath, StandardCopyOption.REPLACE_EXISTING);
-
+				Path path = Paths.get(UPLOAD_DIR + fileName);
+				Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
 				fileNames.add(fileName);
 			} catch (IOException e) {
 				throw new Exception("Exception got while saving files : " + e.getMessage());
@@ -247,7 +243,6 @@ public class EventServiceImpl implements EventService {
 		try {
 			event = eventRepository.findById(eventId).get();
 			String str = event.getImageName();
-			str = str.replace("event//images//", "");
 			event.setImageName(str);
 			return event;
 		} catch (Exception ex) {

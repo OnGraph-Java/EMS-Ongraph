@@ -9,6 +9,7 @@ import com.opencsv.CSVWriter;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,11 +17,21 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+
+import javax.activation.MimetypesFileTypeMap;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 
@@ -253,5 +264,31 @@ public class EventController {
 		}
 
 	}
+
+	@GetMapping("/images/{imageName}")
+    public ResponseEntity<Resource> getImage(@PathVariable String imageName, HttpServletRequest request) throws MalformedURLException {
+		
+		  try {
+	            Path imagePath = Paths.get("event//images//").resolve(imageName).normalize();
+	            Resource imageResource = new UrlResource(imagePath.toUri());
+
+	            if (imageResource.exists() && imageResource.isReadable()) {
+	                MediaType contentType = determineContentType(imagePath.toFile());
+
+	            	return ResponseEntity.ok()
+	                        .contentType(contentType) 
+	                        .body(imageResource);
+	            } else {
+	                return ResponseEntity.notFound().build();
+	            }
+	        } catch (MalformedURLException e) {
+	            return ResponseEntity.notFound().build();
+	        }
+    }
+	
+	 private MediaType determineContentType(File file) {
+	        String mimeType = new MimetypesFileTypeMap().getContentType(file);
+	        return MediaType.parseMediaType(mimeType);
+	    }
 
 }
