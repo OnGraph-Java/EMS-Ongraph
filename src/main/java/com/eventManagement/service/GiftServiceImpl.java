@@ -6,8 +6,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,7 +31,7 @@ public class GiftServiceImpl implements GiftService {
 
 	private Logger logger = LoggerFactory.getLogger(GiftServiceImpl.class.getName());
 
-	SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+	DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
 	public static String projectlocalPath = System.getProperty("user.dir");
 
@@ -41,6 +41,8 @@ public class GiftServiceImpl implements GiftService {
 	@Override
 	public String addGift(GiftDto giftDto, MultipartFile file) {
 		logger.info("Add gift service started :");
+		LocalDate currentDate = LocalDate.now();
+
 		String response = "";
 		Gift gift = new Gift();
 		try {
@@ -48,7 +50,7 @@ public class GiftServiceImpl implements GiftService {
 
 			String imageName = saveFileInSystem(file);
 			gift.setImageName(imageName);
-			gift.setCreatedOn(sdf.parse(sdf.format(new Date())));
+			gift.setCreatedOn(LocalDate.parse(currentDate.format(df), df));
 			giftRepository.save(gift);
 			logger.info("Add gift service ended :");
 			response = "Successfully saved Gift";
@@ -61,6 +63,7 @@ public class GiftServiceImpl implements GiftService {
 
 	@Override
 	public String updateGift(Long giftId, @Valid GiftDto giftDto, MultipartFile file) {
+		LocalDate currentDate = LocalDate.now();
 
 		try {
 			logger.info("Update gift service started :");
@@ -73,7 +76,7 @@ public class GiftServiceImpl implements GiftService {
 				String imageName = saveFileInSystem(file);
 				updatedGift.setImageName(imageName);
 			}
-			updatedGift.setLastUpdated(sdf.parse(sdf.format(new Date())));
+			updatedGift.setLastUpdated(LocalDate.parse(currentDate.format(df), df));
 			giftRepository.save(updatedGift);
 		} catch (Exception ex) {
 			logger.error("Exception got while updating gift :" + ex.getMessage());
@@ -96,18 +99,18 @@ public class GiftServiceImpl implements GiftService {
 
 	public String saveFileInSystem(MultipartFile file) throws Exception {
 		logger.info("Savefile in system service started :");
-		String UPLOAD_DIR = "event//images//";
-		String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+		String fileName = file.getOriginalFilename();
 		try {
-			Path path = Paths.get(UPLOAD_DIR + fileName);
-			Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+			Path imagePath = Path.of("src", "main", "resources", "static", "img", fileName);
+			Files.copy(file.getInputStream(), imagePath, StandardCopyOption.REPLACE_EXISTING);
+
 			logger.info("Savefile in system service ended :");
 		} catch (IOException e) {
 			throw new Exception("Exception got while saving files : " + e.getMessage());
 		} catch (UncheckedIOException e) {
 			throw new Exception("An UncheckedIOException occurred: " + e.getMessage());
 		}
-		return UPLOAD_DIR + fileName;
+		return fileName;
 
 	}
 
@@ -118,7 +121,7 @@ public class GiftServiceImpl implements GiftService {
 		try {
 			gift = giftRepository.findById(giftId).get();
 			String str = gift.getImageName();
-			str = projectlocalPath + "//" + str;
+			str = str.replace("event//images//", "");
 			gift.setImageName(str);
 			logger.info("Find gift service ended :");
 
@@ -129,18 +132,40 @@ public class GiftServiceImpl implements GiftService {
 	}
 
 	@Override
-	public List<Gift> findAllGift(Long adminId, String sortBy, String title, boolean isDashboard) {
+	public List<Gift> findAllGift(Long adminId, String sortBy, String title, boolean isDashboard, String fromDate,
+			String endDate) {
 		logger.info("Find all gift service started :");
 		List<Gift> giftList;
+		if (sortBy.equals("points")) {
+			sortBy = "redeemRequirePoints";
+		}
 		if (isDashboard) {
-			PageRequest pageReq = PageRequest.of(0, 5);
-			giftList = giftRepository.findAllGiftByAdminIdPage(adminId, sortBy, title.toLowerCase(), pageReq);
+			 Sort sort = Sort.by(Sort.Direction.DESC, sortBy);
+			PageRequest pageReq = PageRequest.of(0, 5, sort);
+			if (fromDate != null && endDate != null) {
+				LocalDate localStartDate = LocalDate.parse(fromDate, df);
+				LocalDate localEndDate = LocalDate.parse(endDate, df);
+				giftList = giftRepository.findAllGiftByAdminIdPageWithDates(adminId, sortBy, title.toLowerCase(),
+						localStartDate, localEndDate, pageReq);
+			} else if (fromDate != null) {
+				LocalDate localStartDate = LocalDate.parse(fromDate, df);
+				giftList = giftRepository.findAllGiftByAdminIdPageWithStartDate(adminId, sortBy, title.toLowerCase(),
+						localStartDate, pageReq);
+			} else if (endDate != null) {
+				LocalDate localEndDate = LocalDate.parse(endDate, df);
+				giftList = giftRepository.findAllGiftByAdminIdPageWithEndDate(adminId, sortBy, title.toLowerCase(),
+						localEndDate, pageReq);
+			} else {
+				giftList = giftRepository.findAllGiftByAdminIdPage(adminId, sortBy, title.toLowerCase(), pageReq);
+			}
 		} else {
-			giftList = giftRepository.findAllGiftByAdminId(adminId, sortBy, title.toLowerCase());
+			 Sort sort = Sort.by(Sort.Direction.DESC, sortBy);
+
+			giftList = giftRepository.findAllGiftByAdminId(adminId, title.toLowerCase(), sort);
 		}
 		for (Gift gift : giftList) {
 			String str = gift.getImageName();
-			str = projectlocalPath + "//" + str;
+			str = str.replace("event//images//", "");
 			gift.setImageName(str);
 		}
 		logger.info("Find all gift service ended :");

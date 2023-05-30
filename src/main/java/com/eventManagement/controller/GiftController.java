@@ -124,12 +124,14 @@ public class GiftController {
 	public ResponseEntity<?> getAllGift(
 			@ApiParam(value = "Admin ID", example = "123") @PathVariable("adminId") Long adminId,
 			@ApiParam(value = "Title") @RequestParam(name = "title", defaultValue = "") String title,
-			@ApiParam(value = "Sort by", allowableValues = "createdOn, title") @RequestParam(name = "sortBy", defaultValue = "createdOn") String sortBy,
-			@ApiParam(value = "Is dashboard") @RequestParam(value = "isDashboard", required = false) boolean isDashboard) {
+			@ApiParam(value = "Sort by", allowableValues = "createdOn, giftTitle, points") @RequestParam(name = "sortBy", defaultValue = "createdOn") String sortBy,
+			@ApiParam(value = "Is dashboard") @RequestParam(value = "isDashboard", required = false) boolean isDashboard,
+			@ApiParam(value = "From Date") @RequestParam(value = "fromDate", required = false) String fromDate,
+			@ApiParam(value = "End Date") @RequestParam(value = "endDate", required = false) String endDate) {
 
 		List<Gift> giftList = null;
 		try {
-			giftList = giftService.findAllGift(adminId, sortBy, title, isDashboard);
+			giftList = giftService.findAllGift(adminId, sortBy, title, isDashboard, fromDate, endDate);
 		} catch (Exception ex) {
 			return ResponseEntity.badRequest().body(ex.getMessage());
 		}

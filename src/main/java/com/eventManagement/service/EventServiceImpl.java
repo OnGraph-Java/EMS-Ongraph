@@ -42,7 +42,7 @@ import com.eventManagement.repository.EventUsersRepository;
 public class EventServiceImpl implements EventService {
 
 	private Logger logger = LoggerFactory.getLogger(EventServiceImpl.class.getName());
-	
+
 	DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 	public static String projectlocalPath = System.getProperty("user.dir");
@@ -143,11 +143,11 @@ public class EventServiceImpl implements EventService {
 		if (isDashboard) {
 			Pageable pageable = PageRequest.of(0, 5);
 			LocalDateTime dateOfEvent = getEventDate(eventDate, isDashboard);
-            if(dateOfEvent == null) {
-            	return new ArrayList<>();
-            }
-			eventList = eventRepository.findFirst5Event(adminId, eventCategory.toLowerCase(),
-					eventType.toLowerCase(), dateOfEvent, title.toLowerCase(), pageable);
+			if (dateOfEvent == null) {
+				return new ArrayList<>();
+			}
+			eventList = eventRepository.findFirst5Event(adminId, eventCategory.toLowerCase(), eventType.toLowerCase(),
+					dateOfEvent, title.toLowerCase(), pageable);
 			// List<Event> eventListStream =
 			// eventList.getContent().stream().limit(5).collect(Collectors.toList());
 		} else {
@@ -166,7 +166,7 @@ public class EventServiceImpl implements EventService {
 			for (Event event : eventList) {
 				String[] images = event.getImageName().split(",");
 				for (String str : images) {
-					//str = projectlocalPath + "//" + str;
+					str = str.replace("event//images//", "");
 					images[i] = str;
 					i++;
 				}
@@ -193,14 +193,12 @@ public class EventServiceImpl implements EventService {
 			if (isDashboard && !eventDate.equals("")) {
 				LocalDateTime localEventDate = LocalDateTime.parse(eventDate, df);
 				currentDate = LocalDateTime.parse(currentDate.format(df), df);
-				if(localEventDate.isBefore(currentDate)) {
+				if (localEventDate.isBefore(currentDate)) {
 					return null;
-				}else {
+				} else {
 					return localEventDate;
 				}
 			}
-
-			
 			currentDate = LocalDateTime.parse(eventDate, df);
 		} catch (Exception ex) {
 			logger.error("Error occure while parsing date: " + ex.getMessage());
@@ -214,6 +212,7 @@ public class EventServiceImpl implements EventService {
 		title = "%" + title.toLowerCase() + "%";
 		try {
 			eventList = eventRepository.findEventByTitle(title);
+			
 		} catch (Exception e) {
 			logger.error("Error occurred while fetching event");
 		}
@@ -223,17 +222,12 @@ public class EventServiceImpl implements EventService {
 	public List<String> saveFileInSystem(MultipartFile[] files) throws Exception {
 
 		List<String> fileNames = new ArrayList<>();
-		//Path imagePath = Paths.get("src", "main", "resources", "static", image.getOriginalFilename());
-        //Files.write(imagePath, image.getBytes());
-		String UPLOAD_DIR = "src//main//resources//static//img";
+
 		for (MultipartFile file : files) {
-			//String fileName = StringUtils.cleanPath(file.getOriginalFilename());
 			try {
-				//Path path = Paths.get(UPLOAD_DIR + fileName);
-				//Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-				 String fileName = file.getOriginalFilename();
-			        Path imagePath = Path.of("src", "main", "resources", "static","img",fileName);
-			        Files.copy(file.getInputStream(), imagePath, StandardCopyOption.REPLACE_EXISTING);
+				String fileName = file.getOriginalFilename();
+				Path imagePath = Path.of("src", "main", "resources", "static", "img", fileName);
+				Files.copy(file.getInputStream(), imagePath, StandardCopyOption.REPLACE_EXISTING);
 
 				fileNames.add(fileName);
 			} catch (IOException e) {
@@ -245,7 +239,6 @@ public class EventServiceImpl implements EventService {
 		return fileNames;
 
 	}
-	
 
 	@Override
 	public Event getEvent(Long eventId) {
@@ -254,7 +247,7 @@ public class EventServiceImpl implements EventService {
 		try {
 			event = eventRepository.findById(eventId).get();
 			String str = event.getImageName();
-			//str = projectlocalPath + "//" + str;
+			str = str.replace("event//images//", "");
 			event.setImageName(str);
 			return event;
 		} catch (Exception ex) {

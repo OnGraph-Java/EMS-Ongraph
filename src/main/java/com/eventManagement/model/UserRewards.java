@@ -81,7 +81,6 @@ public class UserRewards {
 	public void setUserRole(String userRole) {
 		this.userRole = userRole;
 	}
-	
 
 	public Long getAdminId() {
 		return adminId;

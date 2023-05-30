@@ -5,7 +5,6 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -28,7 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.eventManagement.dto.RewardPoints;
 import com.eventManagement.dto.RewardsDto;
-import com.eventManagement.model.PageEntity;
 import com.eventManagement.model.Reward;
 import com.eventManagement.model.UserRewards;
 import com.eventManagement.model.UserRewardsHistory;

@@ -1,5 +1,6 @@
 package com.eventManagement.model;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -39,11 +40,11 @@ public class Gift {
 	
 	@Column
     @JsonFormat(pattern = "yyyy-MM-dd")
-	private Date createdOn;
+	private LocalDate createdOn;
 	
 	@Column
     @JsonFormat(pattern = "yyyy-MM-dd")
-	private Date lastUpdated;
+	private LocalDate lastUpdated;
 
 	public Long getGiftId() {
 		return giftId;
@@ -101,19 +102,19 @@ public class Gift {
 		this.imageName = imageName;
 	}
 
-	public Date getCreatedOn() {
+	public LocalDate getCreatedOn() {
 		return createdOn;
 	}
 
-	public void setCreatedOn(Date createdOn) {
+	public void setCreatedOn(LocalDate createdOn) {
 		this.createdOn = createdOn;
 	}
 
-	public Date getLastUpdated() {
+	public LocalDate getLastUpdated() {
 		return lastUpdated;
 	}
 
-	public void setLastUpdated(Date lastUpdated) {
+	public void setLastUpdated(LocalDate lastUpdated) {
 		this.lastUpdated = lastUpdated;
 	}
 	
