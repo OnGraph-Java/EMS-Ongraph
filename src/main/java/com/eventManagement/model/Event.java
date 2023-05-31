@@ -71,6 +71,9 @@ public class Event {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private LocalDateTime lastUpdated;
 	
+	@Column
+	private boolean isActive;
+	
 	public Long getEventId() {
 		return eventId;
 	}
@@ -220,4 +223,13 @@ public class Event {
 	public void setEventRewardPoints(Long eventRewardPoints) {
 		this.eventRewardPoints = eventRewardPoints;
 	}
+	
+	public boolean isActive() {
+		return isActive;
+	}
+
+	public void setActive(boolean isActive) {
+		this.isActive = isActive;
+	}
+
 }

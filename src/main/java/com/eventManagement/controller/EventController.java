@@ -49,8 +49,8 @@ public class EventController {
 	StatisticsService statisticsService;
 
 	// completed apart of event start end date/time
-	@PostMapping(value = "/createEvent",  produces = MediaType.APPLICATION_JSON_VALUE,
-		    consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+	@PostMapping(value = "/createEvent", produces = MediaType.APPLICATION_JSON_VALUE, consumes = {
+			MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE })
 	@ApiOperation("Create an event")
 	@ApiResponses({ @ApiResponse(code = 200, message = "Event created successfully"),
 			@ApiResponse(code = 400, message = "Bad request") })
@@ -60,12 +60,12 @@ public class EventController {
 
 		if (result.hasErrors()) {
 			StringBuilder errorMessage = new StringBuilder();
-		    result.getFieldErrors().forEach(error -> {
-		        String fieldName = error.getField();
-		        String defaultMessage = error.getDefaultMessage();
-		        errorMessage.append(fieldName).append(": ").append(defaultMessage).append(". ");
-		    });
-		    res.put("response", errorMessage.toString());
+			result.getFieldErrors().forEach(error -> {
+				String fieldName = error.getField();
+				String defaultMessage = error.getDefaultMessage();
+				errorMessage.append(fieldName).append(": ").append(defaultMessage).append(". ");
+			});
+			res.put("response", errorMessage.toString());
 			result.getAllErrors().forEach(error -> errorMessage.append(error.getDefaultMessage()).append(". "));
 			res.put("response", errorMessage.toString());
 
@@ -73,7 +73,7 @@ public class EventController {
 		}
 		String response = "";
 		try {
-		
+
 			response = eventService.createEvent(files, event);
 			res.put("response", response);
 
@@ -85,23 +85,24 @@ public class EventController {
 		return ResponseEntity.ok().body(res);
 	}
 
-	@PostMapping(value="/updateEvent/{id}",  produces = MediaType.APPLICATION_JSON_VALUE,
-		    consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-	@ApiOperation(value="Update an event", consumes = "multipart/form-data")
+	@PostMapping(value = "/updateEvent/{id}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = {
+			MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE })
+	@ApiOperation(value = "Update an event", consumes = "multipart/form-data")
 	@ApiResponses({ @ApiResponse(code = 200, message = "Event updated successfully"),
 			@ApiResponse(code = 400, message = "Bad request") })
-	public ResponseEntity<HashMap<String, String>> updateEvent(@PathVariable("id") Long id, @RequestPart(value="files", required = false) MultipartFile[] files,
+	public ResponseEntity<HashMap<String, String>> updateEvent(@PathVariable("id") Long id,
+			@RequestPart(value = "files", required = false) MultipartFile[] files,
 			@RequestPart("data") @Valid EventDto event, BindingResult result) {
 		HashMap<String, String> res = new HashMap<>();
 
 		if (result.hasErrors()) {
 			StringBuilder errorMessage = new StringBuilder();
-		    result.getFieldErrors().forEach(error -> {
-		        String fieldName = error.getField();
-		        String defaultMessage = error.getDefaultMessage();
-		        errorMessage.append(fieldName).append(": ").append(defaultMessage).append(". ");
-		    });
-		    res.put("response", errorMessage.toString());
+			result.getFieldErrors().forEach(error -> {
+				String fieldName = error.getField();
+				String defaultMessage = error.getDefaultMessage();
+				errorMessage.append(fieldName).append(": ").append(defaultMessage).append(". ");
+			});
+			res.put("response", errorMessage.toString());
 			result.getAllErrors().forEach(error -> errorMessage.append(error.getDefaultMessage()).append(". "));
 			res.put("response", errorMessage.toString());
 
@@ -130,7 +131,8 @@ public class EventController {
 			@ApiParam(value = "Is dashboard") @RequestParam(value = "isDashboard", required = false) boolean isDashboard,
 			@ApiParam(value = "Event title") @RequestParam(value = "title", defaultValue = "all") String title) {
 
-		List<Event> eventList = eventService.getAllEvent(adminId, eventCategory, eventType, eventDate, isDashboard, title);
+		List<Event> eventList = eventService.getAllEvent(adminId, eventCategory, eventType, eventDate, isDashboard,
+				title);
 		if (eventList != null) {
 			return ResponseEntity.ok().body(eventList);
 		} else {
@@ -140,11 +142,10 @@ public class EventController {
 
 	@GetMapping("/getEvent/{eventId}")
 	@ApiOperation(value = "Get Event by ID", notes = "Retrieve an event by its ID")
-	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "Success", response = Event.class),
-			@ApiResponse(code = 200, message = "No event found with the given ID", response = String.class)
-	})
-	public ResponseEntity<?> getEvent(@PathVariable("eventId") @ApiParam(value = "Event ID", example = "123") Long eventId) {
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Success", response = Event.class),
+			@ApiResponse(code = 200, message = "No event found with the given ID", response = String.class) })
+	public ResponseEntity<?> getEvent(
+			@PathVariable("eventId") @ApiParam(value = "Event ID", example = "123") Long eventId) {
 		Event event = eventService.getEvent(eventId);
 		return ResponseEntity.ok().body(event);
 	}
@@ -164,8 +165,7 @@ public class EventController {
 	@ApiOperation("Register an event user")
 	@ApiResponses({ @ApiResponse(code = 200, message = "Event user registered successfully"),
 			@ApiResponse(code = 400, message = "Bad request") })
-	public ResponseEntity<?> registerEventUser(@RequestBody @Valid EventUsersDto eventUsersDto,
-			BindingResult result) {
+	public ResponseEntity<?> registerEventUser(@RequestBody @Valid EventUsersDto eventUsersDto, BindingResult result) {
 		HashMap<String, String> res = new HashMap<>();
 
 		String respose = "";
@@ -192,7 +192,7 @@ public class EventController {
 			@ApiResponse(code = 200, message = "No event users exist") })
 	public ResponseEntity<?> getEventRegisterUsers(
 			@ApiParam(value = "Event ID", example = "123") @PathVariable("eventId") Long eventId,
-  	  @RequestParam(value = "page", defaultValue = "0") int page,
+			@RequestParam(value = "page", defaultValue = "0") int page,
 			@RequestParam(value = "size", defaultValue = "7") int size) {
 		Page<EventUsers> eventUserList = eventService.getEventRegisterUsers(eventId, page, size);
 		if (eventUserList != null) {
@@ -266,29 +266,44 @@ public class EventController {
 	}
 
 	@GetMapping("/images/{imageName}")
-    public ResponseEntity<Resource> getImage(@PathVariable String imageName, HttpServletRequest request) throws MalformedURLException {
-		
-		  try {
-	            Path imagePath = Paths.get("event//images//").resolve(imageName).normalize();
-	            Resource imageResource = new UrlResource(imagePath.toUri());
+	public ResponseEntity<Resource> getImage(@PathVariable String imageName, HttpServletRequest request)
+			throws MalformedURLException {
 
-	            if (imageResource.exists() && imageResource.isReadable()) {
-	                MediaType contentType = determineContentType(imagePath.toFile());
+		try {
+			Path imagePath = Paths.get("event//images//").resolve(imageName).normalize();
+			Resource imageResource = new UrlResource(imagePath.toUri());
 
-	            	return ResponseEntity.ok()
-	                        .contentType(contentType) 
-	                        .body(imageResource);
-	            } else {
-	                return ResponseEntity.notFound().build();
-	            }
-	        } catch (MalformedURLException e) {
-	            return ResponseEntity.notFound().build();
-	        }
-    }
+			if (imageResource.exists() && imageResource.isReadable()) {
+				MediaType contentType = determineContentType(imagePath.toFile());
+
+				return ResponseEntity.ok().contentType(contentType).body(imageResource);
+			} else {
+				return ResponseEntity.notFound().build();
+			}
+		} catch (MalformedURLException e) {
+			return ResponseEntity.notFound().build();
+		}
+	}
+
+	private MediaType determineContentType(File file) {
+		String mimeType = new MimetypesFileTypeMap().getContentType(file);
+		return MediaType.parseMediaType(mimeType);
+	}
 	
-	 private MediaType determineContentType(File file) {
-	        String mimeType = new MimetypesFileTypeMap().getContentType(file);
-	        return MediaType.parseMediaType(mimeType);
-	    }
+	@DeleteMapping("/delete/{eventId}")
+	@ApiOperation("Delete and Event")
+	@ApiResponses({ @ApiResponse(code = 200, message = "Event deleted successfully"),
+			@ApiResponse(code = 400, message = "An error occurred while deleting the event") })
+	public ResponseEntity<HashMap<String, String>> deleteEvent(@ApiParam(value = "Admin ID", example = "123") @PathVariable Long eventId) {
+		String response = "";
+		HashMap<String, String> res = new HashMap<>();
+		try {
+			response = eventService.deleteEvent(eventId);
+			res.put("response", response);
+		} catch (Exception e) {
+			res.put("response", "An error occurred while deleting the event :" + e.getMessage());
+		}
+		return ResponseEntity.ok().body(res);
+	}
 
 }

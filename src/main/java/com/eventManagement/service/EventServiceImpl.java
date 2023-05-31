@@ -18,6 +18,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -324,5 +325,25 @@ public class EventServiceImpl implements EventService {
 			logger.error("No such event Exists");
 		}
 		return eventUserList;
+	}
+	
+	@Override
+	@Transactional
+	public String deleteEvent(Long eventId) {
+		Optional<Event> event = eventRepository.findById(eventId);
+		if(event.isEmpty()) {
+			return "No Such Event Exist";
+		}
+		try {
+			if (event.isPresent()  && event.get().isActive()) {
+				eventRepository.updateEventStatus(eventId, false);
+				return "Event Deleted Successfully";
+			} else {
+				return "Event was already Deleted";
+			}
+		} catch (Exception ex) {
+			logger.error("Exception got while deleting event :" + ex.getMessage());
+			return "Exception got while deleting event :" + ex.getMessage();
+		}
 	}
 }

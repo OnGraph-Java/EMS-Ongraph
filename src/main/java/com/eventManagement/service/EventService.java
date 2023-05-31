@@ -30,4 +30,6 @@ public interface EventService {
 
 	List<EventUsers> getExportEventRegisterUsers(Long eventId);
 	
+	String deleteEvent(Long eventId);
+	
 }
