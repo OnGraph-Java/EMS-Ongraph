@@ -1,18 +1,9 @@
 package com.eventManagement.model;
 
-import java.time.LocalDateTime;
-import java.util.Date;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
-import org.springframework.format.annotation.DateTimeFormat;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
+
+import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table
@@ -59,18 +50,22 @@ public class Event {
 
 	@Column
 	private String imageName;
-	
+
 	@Column
 	private Long eventRewardPoints;
 
 	@Column
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private LocalDateTime createdOn;
-	
+
 	@Column
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private LocalDateTime lastUpdated;
-	
+
+	@Column
+	private boolean isActive = true;
+
+
 	public Long getEventId() {
 		return eventId;
 	}
@@ -195,6 +190,7 @@ public class Event {
 		this.link = link;
 		this.eventDetails = eventDetails;
 		this.imageName = imageName;
+		this.isActive = true;
 	}
 
 	public LocalDateTime getCreatedOn() {
@@ -219,5 +215,13 @@ public class Event {
 
 	public void setEventRewardPoints(Long eventRewardPoints) {
 		this.eventRewardPoints = eventRewardPoints;
+	}
+
+	public boolean isActive() {
+		return isActive;
+	}
+
+	public void setActive(boolean active) {
+		isActive = active;
 	}
 }

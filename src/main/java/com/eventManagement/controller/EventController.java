@@ -8,8 +8,9 @@ import com.eventManagement.service.StatisticsService;
 import com.opencsv.CSVWriter;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,14 +18,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-
 import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -266,29 +263,39 @@ public class EventController {
 	}
 
 	@GetMapping("/images/{imageName}")
-    public ResponseEntity<Resource> getImage(@PathVariable String imageName, HttpServletRequest request) throws MalformedURLException {
-		
-		  try {
-	            Path imagePath = Paths.get("event//images//").resolve(imageName).normalize();
-	            Resource imageResource = new UrlResource(imagePath.toUri());
+	public ResponseEntity<Resource> getImage(@PathVariable String imageName, HttpServletRequest request) throws MalformedURLException {
 
-	            if (imageResource.exists() && imageResource.isReadable()) {
-	                MediaType contentType = determineContentType(imagePath.toFile());
+		try {
+			Path imagePath = Paths.get("event//images//").resolve(imageName).normalize();
+			Resource imageResource = new UrlResource(imagePath.toUri());
 
-	            	return ResponseEntity.ok()
-	                        .contentType(contentType) 
-	                        .body(imageResource);
-	            } else {
-	                return ResponseEntity.notFound().build();
-	            }
-	        } catch (MalformedURLException e) {
-	            return ResponseEntity.notFound().build();
-	        }
-    }
-	
-	 private MediaType determineContentType(File file) {
-	        String mimeType = new MimetypesFileTypeMap().getContentType(file);
-	        return MediaType.parseMediaType(mimeType);
-	    }
+			if (imageResource.exists() && imageResource.isReadable()) {
+				MediaType contentType = determineContentType(imagePath.toFile());
 
+				return ResponseEntity.ok().contentType(contentType).body(imageResource);
+			} else {
+				return ResponseEntity.notFound().build();
+			}
+		} catch (MalformedURLException e) {
+			return ResponseEntity.notFound().build();
+		}
+	}
+
+	private MediaType determineContentType(File file) {
+		String mimeType = new MimetypesFileTypeMap().getContentType(file);
+		return MediaType.parseMediaType(mimeType);
+	}
+
+	@DeleteMapping("/delete/{eventId}")
+	public ResponseEntity<HashMap<String, String>> deleteEvent(@PathVariable Long eventId) {
+		String response = "";
+		HashMap<String, String> res = new HashMap<>();
+		try {
+			response = eventService.deleteEvent(eventId);
+			res.put("response", response);
+		} catch (Exception e) {
+			res.put("response", "An error occurred while deleting the event :" + e.getMessage());
+		}
+		return ResponseEntity.ok().body(res);
+	}
 }

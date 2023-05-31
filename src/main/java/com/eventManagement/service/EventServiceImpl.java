@@ -1,5 +1,24 @@
 package com.eventManagement.service;
 
+import com.eventManagement.dto.EventDto;
+import com.eventManagement.dto.EventUsersDto;
+import com.eventManagement.model.Event;
+import com.eventManagement.model.EventUsers;
+import com.eventManagement.repository.EventRepository;
+import com.eventManagement.repository.EventUsersRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.transaction.Transactional;
+import javax.validation.Valid;
+import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -7,36 +26,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
-import javax.validation.Valid;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
-
-import com.eventManagement.dto.EventDto;
-import com.eventManagement.dto.EventUsersDto;
-import com.eventManagement.model.Event;
-import com.eventManagement.model.EventUsers;
-import com.eventManagement.repository.EventRepository;
-import com.eventManagement.repository.EventUsersRepository;
 
 @Service
 public class EventServiceImpl implements EventService {
@@ -219,7 +214,8 @@ public class EventServiceImpl implements EventService {
 	public List<String> saveFileInSystem(MultipartFile[] files) throws Exception {
 
 		List<String> fileNames = new ArrayList<>();
-		String UPLOAD_DIR = "event//images//";
+		//String UPLOAD_DIR = "event//images//";
+		String UPLOAD_DIR = "event" + File.separator + "images" + File.separator;
 		for (MultipartFile file : files) {
 			String fileName = StringUtils.cleanPath(file.getOriginalFilename());
 			try {
@@ -324,5 +320,23 @@ public class EventServiceImpl implements EventService {
 			logger.error("No such event Exists");
 		}
 		return eventUserList;
+	}
+
+	@Override
+	@Transactional
+	public String deleteEvent(Long eventId) {
+		Event event = eventRepository.findByIdAndFlag(eventId);
+		try {
+			if (event != null && event.isActive() == true) {
+				eventRepository.updateEventStatus(eventId, false);
+				eventRepository.deleteEvent(eventId);
+				return "Event Deleted Successfully";
+			} else {
+				return "Event was already Deleted";
+			}
+		} catch (Exception ex) {
+			logger.error("Exception got while deleting event :" + ex.getMessage());
+			return "Exception got while deleting event :" + ex.getMessage();
+		}
 	}
 }
