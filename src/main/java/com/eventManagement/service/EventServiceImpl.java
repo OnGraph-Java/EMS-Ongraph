@@ -204,7 +204,7 @@ public class EventServiceImpl implements EventService {
 		title = "%" + title.toLowerCase() + "%";
 		try {
 			eventList = eventRepository.findEventByTitle(title);
-			
+
 		} catch (Exception e) {
 			logger.error("Error occurred while fetching event");
 		}
@@ -214,8 +214,7 @@ public class EventServiceImpl implements EventService {
 	public List<String> saveFileInSystem(MultipartFile[] files) throws Exception {
 
 		List<String> fileNames = new ArrayList<>();
-		//String UPLOAD_DIR = "event//images//";
-		String UPLOAD_DIR = "event" + File.separator + "images" + File.separator;
+		String UPLOAD_DIR = "event//images//";
 		for (MultipartFile file : files) {
 			String fileName = StringUtils.cleanPath(file.getOriginalFilename());
 			try {

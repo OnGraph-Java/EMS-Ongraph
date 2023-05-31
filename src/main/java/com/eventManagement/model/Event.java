@@ -20,11 +20,11 @@ public class Event {
 	private String eventTitle;
 
 	@Column
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private LocalDateTime startDate;
 
 	@Column
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private LocalDateTime endDate;
 
 	@Column
@@ -64,7 +64,6 @@ public class Event {
 
 	@Column
 	private boolean isActive = true;
-
 
 	public Long getEventId() {
 		return eventId;

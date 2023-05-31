@@ -13,10 +13,11 @@ import java.util.List;
 public interface EventService {
 
 	String createEvent(MultipartFile[] files, EventDto event);
-	
+
 	String updateEvent(Long id, EventDto updatedEvent, MultipartFile[] files) throws Exception;
-	
-	List<Event> getAllEvent(Long adminId,String eventCategory,String eventType,String eventDate, boolean isDashboard, String title);
+
+	List<Event> getAllEvent(Long adminId, String eventCategory, String eventType, String eventDate, boolean isDashboard,
+			String title);
 
 	List<Event> searchEvent(String searchText);
 
